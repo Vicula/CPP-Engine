@@ -5,12 +5,17 @@
             "label": "C/C++: clang++ build active file",
             "command": "/usr/bin/clang++",
             "args": [
-                "-fcolor-diagnostics",
-                "-fansi-escape-codes",
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+              "-fcolor-diagnostics",
+              "-fansi-escape-codes",
+              "-g",
+              "-I\"${cwd}/libs/\"",
+              "${file}",
+              "-lSDL2",
+              "-lSDL2_image",
+              "-lSDL2_ttf",
+              "-llua",
+              "-o",
+              "${fileDirname}/${fileBasenameNoExtension}"
             ],
             "options": {
                 "cwd": "${fileDirname}"
