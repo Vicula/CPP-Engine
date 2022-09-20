@@ -1,8 +1,24 @@
+CC = clang++
+LANG_STD = -std=c++17
+COMPILER_FLAGS = -Wall -Wfatal-errors
+INCLUDE_PATH = -I"./libs/"
+SRC_FILES = ./src/*.cpp \
+			./src/Engine/*.cpp \
+			./src/Logger/*.cpp \
+			./src/ECS/*.cpp
+LINKER_FLAGS = -lSDL2 \
+				-lSDL2_image \
+				-lSDL2_ttf \
+				-lSDL2_mixer -llua
+OBJ_NAME = engine
+
 build:
-	clang++ -g -I"./libs/" src/*.cpp -lSDL2 -lSDL2_image -lSDL2_ttf -llua -o engine;
+	$(CC) $(COMPILER_FLAGS) $(LANG_STD) $(INCLUDE_PATH) $(SRC_FILES) $(LINKER_FLAGS) -o $(OBJ_NAME);
 
 run:
-	./engine;
+	./$(OBJ_NAME);
 
 clean: 
-	rm engine;
+	rm $(OBJ_NAME);
+	rm -rf $(OBJ_NAME).dSYM/;
+	find ./src -type f ! -name "*.*" -not -path "*.dSYM/*" -exec rm -rf "$(basename {}).dSYM" \; -exec rm "$(basename {})" \;

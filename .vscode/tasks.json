@@ -8,11 +8,13 @@
               "-fcolor-diagnostics",
               "-fansi-escape-codes",
               "-g",
+              "-std=c++17",
               "-I\"${cwd}/libs/\"",
               "${file}",
               "-lSDL2",
               "-lSDL2_image",
               "-lSDL2_ttf",
+              "-lSDL2_mixer",
               "-llua",
               "-o",
               "${fileDirname}/${fileBasenameNoExtension}"
