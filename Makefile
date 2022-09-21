@@ -5,7 +5,8 @@ INCLUDE_PATH = -I"./libs/"
 SRC_FILES = ./src/*.cpp \
 			./src/Engine/*.cpp \
 			./src/Logger/*.cpp \
-			./src/ECS/*.cpp
+			./src/ECS/*.cpp \
+			./src/AssetStore/*.cpp
 LINKER_FLAGS = -lSDL2 \
 				-lSDL2_image \
 				-lSDL2_ttf \

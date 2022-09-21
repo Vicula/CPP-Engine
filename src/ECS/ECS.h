@@ -43,7 +43,6 @@ protected:
     static int nextId;
 };
 
-// Used to assign a unique id to a component type
 template <typename T>
 class Component : public IComponent
 {
@@ -70,13 +69,28 @@ private:
 
 public:
     Entity(int id) : id(id){};
+    Entity(const Entity &entity) = default;
     int GetId() const;
 
     Entity &operator=(const Entity &other) = default;
-    bool operator==(const Entity &other) const { return id == other.id; }
-    bool operator!=(const Entity &other) const { return id != other.id; }
-    bool operator>(const Entity &other) const { return id > other.id; }
-    bool operator<(const Entity &other) const { return id < other.id; }
+    bool operator==(const Entity &other) const { return id == other.id; };
+    bool operator!=(const Entity &other) const { return id != other.id; };
+    bool operator>(const Entity &other) const { return id > other.id; };
+    bool operator<(const Entity &other) const { return id < other.id; };
+
+    template <typename TComponent, typename... TArgs>
+    Entity AddComponent(TArgs &&...args) const;
+
+    template <typename TComponent>
+    Entity RemoveComponent() const;
+
+    template <typename TComponent>
+    bool HasComponent() const;
+
+    template <typename TComponent>
+    TComponent &GetComponent() const;
+
+    class Registry *registry;
 };
 
 /**
@@ -105,13 +119,6 @@ public:
     template <typename TComponent>
     void RequireComponent();
 };
-
-template <typename TComponent>
-void System::RequireComponent()
-{
-    const auto componentId = Component<TComponent>::GetId();
-    componentSignature.set(componentId);
-}
 
 /**
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +191,15 @@ private:
     std::set<Entity> entitiesToBeKilled;
 
 public:
-    Registry() = default;
+    Registry()
+    {
+        Logger::Log("Registry created");
+    };
+
+    ~Registry()
+    {
+        Logger::Log("Registry Destroyed");
+    };
 
     // The Registry Update() finally processes the entities that are waiting to be created or killed to the systems
     void Update();
@@ -204,19 +219,25 @@ public:
      * @brief Add a component to the Registry
      */
     template <typename TComponent, typename... TArgs>
-    void AddComponent(Entity entity, TArgs &&...args);
+    Registry *AddComponent(Entity entity, TArgs &&...args);
 
     /**
      * @brief Remove a component from the Registry
      */
     template <typename TComponent>
-    void RemoveComponent(Entity entity);
+    Registry *RemoveComponent(Entity entity);
 
     /**
      * @brief Check wether the Registry has a component
      */
     template <typename TComponent>
     bool HasComponent(Entity entity) const;
+
+    /**
+     * @brief Retrieve a component from the Registry
+     */
+    template <typename TComponent>
+    TComponent &GetComponent(Entity entity) const;
     //@}
 
     /**
@@ -231,13 +252,13 @@ public:
      * @brief Add a system to the Registry
      */
     template <typename TSystem, typename... TArgs>
-    void AddSystem(TArgs &&...args);
+    Registry *AddSystem(TArgs &&...args);
 
     /**
      * @brief Remove a system from the Registry
      */
     template <typename TSystem>
-    void RemoveSystem();
+    Registry *RemoveSystem();
 
     /**
      * @brief Check to see if Registry has the system
@@ -259,8 +280,15 @@ public:
     //@}
 };
 
+template <typename TComponent>
+void System::RequireComponent()
+{
+    const auto componentId = Component<TComponent>::GetId();
+    componentSignature.set(componentId);
+};
+
 template <typename TComponent, typename... TArgs>
-void Registry::AddComponent(Entity entity, TArgs &&...args)
+Registry *Registry::AddComponent(Entity entity, TArgs &&...args)
 {
     const auto componentId = Component<TComponent>::GetId();
     const auto entityId = entity.GetId();
@@ -283,44 +311,56 @@ void Registry::AddComponent(Entity entity, TArgs &&...args)
     entityComponentSignatures[entityId].set(componentId);
 
     Logger::Log("Component id = " + std::to_string(componentId) + " was added to entity id " + std::to_string(entityId));
-}
+    return this;
+};
 
 template <typename TComponent>
-void Registry::RemoveComponent(Entity entity)
+Registry *Registry::RemoveComponent(Entity entity)
 {
     entityComponentSignatures[entity.GetId()]
         .set(Component<TComponent>::GetId(), false);
-}
+    return this;
+};
 
 template <typename TComponent>
 bool Registry::HasComponent(Entity entity) const
 {
     return entityComponentSignatures[entity.GetId()]
         .test(Component<TComponent>::GetId());
-}
+};
+
+template <typename TComponent>
+TComponent &Registry::GetComponent(Entity entity) const
+{
+    return std::static_pointer_cast<Pool<TComponent>>(
+               componentPools[Component<TComponent>::GetId()])
+        ->Get(entity.GetId());
+};
 
 template <typename TSystem, typename... TArgs>
-void Registry::AddSystem(TArgs &&...args)
+Registry *Registry::AddSystem(TArgs &&...args)
 {
     systems.insert(
         std::make_pair(
             std::type_index(typeid(TSystem)),
             std::make_shared<TSystem>(std::forward<TArgs>(args)...)));
-}
+    return this;
+};
 
 template <typename TSystem>
-void Registry::RemoveSystem()
+Registry *Registry::RemoveSystem()
 {
     systems.erase(
         systems.find(
             std::type_index(typeid(TSystem))));
-}
+    return this;
+};
 
 template <typename TSystem>
 bool Registry::HasSystem() const
 {
     return systems.find(std::type_index(typeid(TSystem))) != systems.end();
-}
+};
 
 template <typename TSystem>
 TSystem &Registry::GetSystem() const
@@ -328,6 +368,34 @@ TSystem &Registry::GetSystem() const
     return *(
         std::static_pointer_cast<TSystem>(
             systems.find(std::type_index(typeid(TSystem)))->second));
-}
+};
+
+template <typename TComponent, typename... TArgs>
+Entity Entity::AddComponent(TArgs &&...args) const
+{
+    registry->AddComponent<TComponent>(
+        *this,
+        std::forward<TArgs>(args)...);
+    return *this;
+};
+
+template <typename TComponent>
+Entity Entity::RemoveComponent() const
+{
+    registry->RemoveComponent<TComponent>(*this);
+    return *this;
+};
+
+template <typename TComponent>
+bool Entity::HasComponent() const
+{
+    return registry->HasComponent<TComponent>(*this);
+};
+
+template <typename TComponent>
+TComponent &Entity::GetComponent() const
+{
+    return registry->GetComponent<TComponent>(*this);
+};
 
 #endif /* __ECS_H__ */

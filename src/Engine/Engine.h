@@ -17,6 +17,7 @@
 #define ENGINE_H
 
 #include "../ECS/ECS.h"
+#include "../AssetStore/AssetStore.h"
 #include <SDL2/SDL.h>
 
 const int FPS = 120;
@@ -25,12 +26,14 @@ const int MILLISECS_PER_FRAME = 1000 / FPS;
 class Engine
 {
 private:
+    bool debugMode = false;
     bool isRunning;
     int millisecsPreviousFrame = 0;
     SDL_Window *window;
     SDL_Renderer *renderer;
 
     std::unique_ptr<Registry> registry;
+    std::unique_ptr<AssetStore> assetStore;
 
 public:
     Engine();
@@ -38,10 +41,11 @@ public:
     void Init();
     void Run();
     void Setup();
+    void LoadLevel(int level);
     void ProcessInput();
     void Update();
     void Render();
-    void Destory();
+    void Destroy();
 
     int windowWidth;
     int windowHeight;

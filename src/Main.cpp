@@ -7,7 +7,7 @@ int main(int argc, char* argv[])
 
    engine.Init();
    engine.Run();
-   engine.Destory();
+   engine.Destroy();
 
     return 0;
 }
