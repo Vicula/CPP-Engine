@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
+#include <deque>
 
 const unsigned int MAX_COMPONENTS = 32;
 
@@ -70,8 +71,9 @@ private:
 public:
     Entity(int id) : id(id){};
     Entity(const Entity &entity) = default;
-    int GetId() const;
 
+    int GetId() const;
+    void Kill();
     Entity &operator=(const Entity &other) = default;
     bool operator==(const Entity &other) const { return id == other.id; };
     bool operator!=(const Entity &other) const { return id != other.id; };
@@ -190,6 +192,8 @@ private:
     std::set<Entity> entitiesToBeAdded;
     std::set<Entity> entitiesToBeKilled;
 
+    std::deque<int> freeIds;
+
 public:
     Registry()
     {
@@ -206,6 +210,8 @@ public:
 
     // Entity management
     Entity CreateEntity();
+
+    void KillEntity(Entity entity);
 
     /**
      ******************************************************************************
@@ -273,10 +279,16 @@ public:
     TSystem &GetSystem() const;
 
     /**
-     * @brief Checks the component signature of an entity and add the entity to the systems
+     * @brief Checks the component signature of an entity and adds the entity to the systems
      *        that are interested in it
      */
     void AddEntityToSystems(Entity entity);
+
+    /**
+     * @brief Checks the component signature of an entity and removes the entity from the systems
+     *        that are interested in it
+     */
+    void RemoveEntityFromSystems(Entity entity);
     //@}
 };
 

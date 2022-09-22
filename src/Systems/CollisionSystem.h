@@ -50,7 +50,7 @@ public:
                 auto &cmprCollider = b.GetComponent<BoxColliderComponent>();
                 auto &cmprTransform = b.GetComponent<TransformComponent>();
 
-                CheckCollision(
+                bool collisionHappened = CheckCollision(
                     transform.position.x + collider.offset.x,
                     transform.position.y + collider.offset.y,
                     collider.width,
@@ -59,6 +59,11 @@ public:
                     cmprTransform.position.y + cmprCollider.offset.y,
                     cmprCollider.width,
                     cmprCollider.height);
+                if (collisionHappened)
+                {
+                    a.Kill();
+                    b.Kill();
+                }
             }
         }
     }

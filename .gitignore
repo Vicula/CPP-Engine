@@ -33,3 +33,5 @@
 
 # Ignore dSYM folders
 *.dSYM/*
+
+/.vscode

@@ -26,7 +26,7 @@ const int MILLISECS_PER_FRAME = 1000 / FPS;
 class Engine
 {
 private:
-    bool debugMode = false;
+    bool isDebug = false;
     bool isRunning;
     int millisecsPreviousFrame = 0;
     SDL_Window *window;

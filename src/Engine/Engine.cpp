@@ -10,6 +10,7 @@
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
+#include "../Systems/RenderColliderSystem.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
@@ -84,7 +85,7 @@ void Engine::ProcessInput()
                 isRunning = false;
                 break;
             case SDLK_MINUS:
-                debugMode = !debugMode;
+                isDebug = !isDebug;
                 break;
             }
             break;
@@ -155,14 +156,16 @@ void Engine::LoadLevel(int level)
         .AddComponent<TransformComponent>(glm::vec2(100.0, 100.0), glm::vec2(1.0, 1.0), 0.0)
         .AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0))
         .AddComponent<SpriteComponent>("tank-image", 32, 32, 2)
-        .AddComponent<BoxColliderComponent>(32, 32);
+        .AddComponent<BoxColliderComponent>(32, 32)
+        .AddComponent<RenderColliderSystem>();
 
     registry
         ->CreateEntity()
-        .AddComponent<TransformComponent>(glm::vec2(100.0, 100.0), glm::vec2(1.0, 1.0), 0.0)
+        .AddComponent<TransformComponent>(glm::vec2(500.0, 100.0), glm::vec2(1.0, 1.0), 0.0)
         .AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0))
-        .AddComponent<SpriteComponent>("truck-image", 32, 32, 1)
-        .AddComponent<BoxColliderComponent>(32, 32);
+        .AddComponent<SpriteComponent>("truck-image", 32, 32, 2)
+        .AddComponent<BoxColliderComponent>(32, 32)
+        .AddComponent<RenderColliderSystem>();
 };
 
 void Engine::Setup()
@@ -194,6 +197,11 @@ void Engine::Render()
     SDL_RenderClear(renderer);
 
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+
+    if (isDebug)
+    {
+        registry->GetSystem<RenderColliderSystem>().Update(renderer);
+    }
 
     SDL_RenderPresent(renderer);
 };
