@@ -16,9 +16,10 @@
 #define COLLISIONSYSTEM_H
 
 #include "../ECS/ECS.h"
+#include "../EventBus/EventBus.h"
+#include "../Events/CollisionEvent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
-#include <SDL2/SDL.h>
 
 class CollisionSystem : public System
 {
@@ -29,10 +30,11 @@ public:
         RequireComponent<TransformComponent>();
     };
 
-    void Update()
+    void Update(std::unique_ptr<EventBus> &eventBus)
     {
         auto entities = GetSystemEntities();
 
+        // Loop all the entities that the system is interested in
         for (auto i = entities.begin(); i != entities.end(); i++)
         {
             Entity a = *i;
@@ -40,16 +42,19 @@ public:
             auto &collider = a.GetComponent<BoxColliderComponent>();
             auto &transform = a.GetComponent<TransformComponent>();
 
+            // Loop all the entities that still need to be checked (to the right of i)
             for (auto j = i; j != entities.end(); j++)
             {
                 Entity b = *j;
 
+                // Bypass if we are trying to test the same entity
                 if (a == b)
                     continue;
 
                 auto &cmprCollider = b.GetComponent<BoxColliderComponent>();
                 auto &cmprTransform = b.GetComponent<TransformComponent>();
 
+                // Perform the AABB collision check between entities a and b
                 bool collisionHappened = CheckCollision(
                     transform.position.x + collider.offset.x,
                     transform.position.y + collider.offset.y,
@@ -59,10 +64,11 @@ public:
                     cmprTransform.position.y + cmprCollider.offset.y,
                     cmprCollider.width,
                     cmprCollider.height);
+
                 if (collisionHappened)
                 {
-                    a.Kill();
-                    b.Kill();
+                    Logger::Log("Entity " + std::to_string(a.GetId()) + " collided wih entity " + std::to_string(b.GetId()));
+                    eventBus->EmitEvent<CollisionEvent>(a, b);
                 }
             }
         }

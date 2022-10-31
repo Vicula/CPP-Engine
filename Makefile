@@ -1,3 +1,6 @@
+################################################################################
+# Declare some Makefile variables
+################################################################################
 CC = clang++
 LANG_STD = -std=c++17
 COMPILER_FLAGS = -Wall -Wfatal-errors
@@ -13,6 +16,9 @@ LINKER_FLAGS = -lSDL2 \
 				-lSDL2_mixer -llua
 OBJ_NAME = engine
 
+################################################################################
+# Declare some Makefile rules
+################################################################################
 build:
 	$(CC) $(COMPILER_FLAGS) $(LANG_STD) $(INCLUDE_PATH) $(SRC_FILES) $(LINKER_FLAGS) -o $(OBJ_NAME);
 

@@ -29,7 +29,7 @@ public:
         RequireComponent<BoxColliderComponent>();
     };
 
-    void Update(SDL_Renderer *renderer)
+    bool Update(SDL_Renderer *renderer)
     {
         for (auto entity : GetSystemEntities())
         {
@@ -45,6 +45,7 @@ public:
             SDL_SetRenderDrawColor(renderer, 255, 0, 0, 1);
             SDL_RenderDrawRect(renderer, &colliderRect);
         }
+        return true;
     }
 };
 

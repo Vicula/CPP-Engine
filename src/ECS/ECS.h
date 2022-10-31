@@ -214,82 +214,98 @@ public:
     void KillEntity(Entity entity);
 
     /**
-     ******************************************************************************
-     * @name Component management.
-     *
-     * @brief Methods used for component managment in the Registry
-     ******************************************************************************
+     ////////////////////////////////////////////////////////////////////////////////
+     // @name Component management.
+     ////////////////////////////////////////////////////////////////////////////////
+     // @brief Methods used for component managment in the Registry
+     ////////////////////////////////////////////////////////////////////////////////
+     @{
      */
-    //@{
     /**
-     * @brief Add a component to the Registry
+     // @brief Add a component to the Registry
+     ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TComponent, typename... TArgs>
     Registry *AddComponent(Entity entity, TArgs &&...args);
 
     /**
-     * @brief Remove a component from the Registry
+     // @brief Remove a component from the Registry
+     ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TComponent>
     Registry *RemoveComponent(Entity entity);
 
     /**
-     * @brief Check wether the Registry has a component
+     // @brief Check wether the Registry has a component
+     ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TComponent>
     bool HasComponent(Entity entity) const;
 
     /**
-     * @brief Retrieve a component from the Registry
+     // @brief Retrieve a component from the Registry
+     ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TComponent>
     TComponent &GetComponent(Entity entity) const;
-    //@}
+    /**
+     @}
+     ////////////////////////////////////////////////////////////////////////////////
+    */
 
     /**
-     ******************************************************************************
-     * @name System management.
-     *
-     * @brief Methods used for system managment in the Registry
-     ******************************************************************************
+     ////////////////////////////////////////////////////////////////////////////////
+     // @name System management.
+     ////////////////////////////////////////////////////////////////////////////////
+     // @brief Methods used for system managment in the Registry
+     ////////////////////////////////////////////////////////////////////////////////
+     @{
      */
-    //@{
     /**
-     * @brief Add a system to the Registry
+     // @brief Add a system to the Registry
+     ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TSystem, typename... TArgs>
     Registry *AddSystem(TArgs &&...args);
 
     /**
-     * @brief Remove a system from the Registry
+     // @brief Remove a system from the Registry
+     ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TSystem>
     Registry *RemoveSystem();
 
     /**
-     * @brief Check to see if Registry has the system
+     // @brief Check to see if Registry has the system
+     ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TSystem>
     bool HasSystem() const;
 
     /**
-     * @brief Retrieve the system from the Registry
+     // @brief Retrieve the system from the Registry
+     ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TSystem>
     TSystem &GetSystem() const;
 
     /**
-     * @brief Checks the component signature of an entity and adds the entity to the systems
-     *        that are interested in it
+     // @brief Checks the component signature of an entity and adds the entity to the systems
+     //        that are interested in it
+     ////////////////////////////////////////////////////////////////////////////////
      */
     void AddEntityToSystems(Entity entity);
 
     /**
-     * @brief Checks the component signature of an entity and removes the entity from the systems
-     *        that are interested in it
+     // @brief Checks the component signature of an entity and removes the entity from the systems
+     //        that are interested in it
+     ////////////////////////////////////////////////////////////////////////////////
      */
     void RemoveEntityFromSystems(Entity entity);
-    //@}
+    /**
+     @}
+     ////////////////////////////////////////////////////////////////////////////////
+    */
 };
 
 template <typename TComponent>
@@ -329,8 +345,12 @@ Registry *Registry::AddComponent(Entity entity, TArgs &&...args)
 template <typename TComponent>
 Registry *Registry::RemoveComponent(Entity entity)
 {
-    entityComponentSignatures[entity.GetId()]
-        .set(Component<TComponent>::GetId(), false);
+    const auto componentId = Component<TComponent>::GetId();
+    const auto entityId = entity.GetId();
+    entityComponentSignatures[entityId].set(componentId, false);
+
+    Logger::Log("Component id = " + std::to_string(componentId) + " was removed from entity id " + std::to_string(entityId));
+    
     return this;
 };
 

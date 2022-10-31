@@ -18,6 +18,7 @@
 
 #include "../ECS/ECS.h"
 #include "../AssetStore/AssetStore.h"
+#include "../EventBus/EventBus.h"
 #include <SDL2/SDL.h>
 
 const int FPS = 120;
@@ -26,14 +27,16 @@ const int MILLISECS_PER_FRAME = 1000 / FPS;
 class Engine
 {
 private:
-    bool isDebug = false;
+    bool isDebug;
     bool isRunning;
     int millisecsPreviousFrame = 0;
     SDL_Window *window;
     SDL_Renderer *renderer;
+    SDL_Rect camera;
 
     std::unique_ptr<Registry> registry;
     std::unique_ptr<AssetStore> assetStore;
+    std::unique_ptr<EventBus> eventBus;
 
 public:
     Engine();

@@ -6,11 +6,16 @@
 #include "../Components/SpriteComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
+#include "../Components/KeyboardControlledComponent.h"
+#include "../Components/CameraFollowComponent.h"
 #include "../Systems/MovementSystem.h"
+#include "../Systems/CameraMovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderColliderSystem.h"
+#include "../Systems/DamageSystem.h"
+#include "../Systems/KeyboardControlSystem.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
@@ -19,8 +24,10 @@
 Engine::Engine()
 {
     isRunning = false;
+    isDebug = false;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
+    eventBus = std::make_unique<EventBus>();
     Logger::Log("Created");
 }
 
@@ -65,6 +72,12 @@ void Engine::Init()
     };
     // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
+    // Initalize the camera view with the entire screen area
+    camera.x = 0;
+    camera.y = 0;
+    camera.w = windowWidth;
+    camera.h = windowHeight;
+
     isRunning = true;
 };
 
@@ -88,6 +101,7 @@ void Engine::ProcessInput()
                 isDebug = !isDebug;
                 break;
             }
+            eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
             break;
         }
     };
@@ -98,15 +112,19 @@ void Engine::LoadLevel(int level)
     // Add the sytems that need to be processed in our Engine
     registry
         ->AddSystem<MovementSystem>()
+        ->AddSystem<CameraMovementSystem>()
         ->AddSystem<RenderSystem>()
         ->AddSystem<AnimationSystem>()
-        ->AddSystem<CollisionSystem>();
+        ->AddSystem<CollisionSystem>()
+        ->AddSystem<RenderColliderSystem>()
+        ->AddSystem<DamageSystem>()
+        ->AddSystem<KeyboardControlSystem>();
 
     // Adding assets to the asset store
     assetStore
         ->AddTexture(renderer, "tank-image", "./assets/images/tank-panther-right.png")
         ->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png")
-        ->AddTexture(renderer, "chopper-image", "./assets/images/chopper.png")
+        ->AddTexture(renderer, "chopper-image", "./assets/images/chopper-spritesheet.png")
         ->AddTexture(renderer, "radar-image", "./assets/images/radar.png")
         ->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
 
@@ -137,35 +155,31 @@ void Engine::LoadLevel(int level)
     mapFile.close();
 
     // Create an entity
-    registry
-        ->CreateEntity()
-        .AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0)
+    registry->CreateEntity()
+        .AddComponent<TransformComponent>(glm::vec2(10.0, 100.0), glm::vec2(1.0, 1.0), 0.0)
         .AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0))
         .AddComponent<SpriteComponent>("chopper-image", 32, 32, 1)
-        .AddComponent<AnimationComponent>(2, 15);
+        .AddComponent<AnimationComponent>(2, 15, true)
+        .AddComponent<KeyboardControlledComponent>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0))
+        .AddComponent<CameraFollowComponent>();
 
-    registry
-        ->CreateEntity()
+    registry->CreateEntity()
         .AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0)
         .AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0))
-        .AddComponent<SpriteComponent>("radar-image", 64, 64, 2)
-        .AddComponent<AnimationComponent>(8, 5);
+        .AddComponent<SpriteComponent>("radar-image", 64, 64, 1)
+        .AddComponent<AnimationComponent>(8, 5, true);
 
-    registry
-        ->CreateEntity()
-        .AddComponent<TransformComponent>(glm::vec2(100.0, 100.0), glm::vec2(1.0, 1.0), 0.0)
-        .AddComponent<RigidBodyComponent>(glm::vec2(30.0, 0.0))
-        .AddComponent<SpriteComponent>("tank-image", 32, 32, 2)
-        .AddComponent<BoxColliderComponent>(32, 32)
-        .AddComponent<RenderColliderSystem>();
+    registry->CreateEntity()
+        .AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0)
+        .AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0))
+        .AddComponent<SpriteComponent>("tank-image", 32, 32, 1)
+        .AddComponent<BoxColliderComponent>(32, 32);
 
-    registry
-        ->CreateEntity()
-        .AddComponent<TransformComponent>(glm::vec2(500.0, 100.0), glm::vec2(1.0, 1.0), 0.0)
+    registry->CreateEntity()
+        .AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0)
         .AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0))
         .AddComponent<SpriteComponent>("truck-image", 32, 32, 2)
-        .AddComponent<BoxColliderComponent>(32, 32)
-        .AddComponent<RenderColliderSystem>();
+        .AddComponent<BoxColliderComponent>(32, 32);
 };
 
 void Engine::Setup()
@@ -175,20 +189,33 @@ void Engine::Setup()
 
 void Engine::Update()
 {
+    // If we are too fast, waste some time until we reach the MILLISECS_PER_FRAME
     // Can comment this out for uncapped FPS
     int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - millisecsPreviousFrame);
     if (timeToWait > 0 && timeToWait <= MILLISECS_PER_FRAME)
         SDL_Delay(MILLISECS_PER_FRAME);
 
+    // The difference in ticks since the last frame, converted to seconds
     double deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0;
 
+    // Store the "previous" frame time
     millisecsPreviousFrame = SDL_GetTicks();
 
+    // Reset all event handlers for the current frame
+    eventBus->Reset();
+
+    // Perform the subscription of the events for all systems
+    registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+    registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+
+    // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();
 
+    // Invoke all the systems that need to update
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
-    registry->GetSystem<CollisionSystem>().Update();
+    registry->GetSystem<CollisionSystem>().Update(eventBus);
+    registry->GetSystem<CameraMovementSystem>().Update(camera);
 };
 
 void Engine::Render()
@@ -196,12 +223,9 @@ void Engine::Render()
     SDL_SetRenderDrawColor(renderer, 21, 21, 21, 1);
     SDL_RenderClear(renderer);
 
-    registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+    registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
 
-    if (isDebug)
-    {
-        registry->GetSystem<RenderColliderSystem>().Update(renderer);
-    }
+    isDebug && registry->GetSystem<RenderColliderSystem>().Update(renderer);
 
     SDL_RenderPresent(renderer);
 };
