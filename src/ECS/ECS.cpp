@@ -8,9 +8,10 @@ int Entity::GetId() const
     return id;
 }
 
-void Entity::Kill()
+bool Entity::Kill()
 {
     registry->KillEntity(*this);
+    return true;
 }
 
 void System::AddEntityToSystem(Entity entity)

@@ -4,7 +4,7 @@
 CC = clang++
 LANG_STD = -std=c++17
 COMPILER_FLAGS = -Wall -Wfatal-errors
-INCLUDE_PATH = -I"./libs/"
+INCLUDE_PATH = -I"./libraries/includes/"
 SRC_FILES = ./src/*.cpp \
 			./src/Engine/*.cpp \
 			./src/Logger/*.cpp \

@@ -73,7 +73,7 @@ public:
     Entity(const Entity &entity) = default;
 
     int GetId() const;
-    void Kill();
+    bool Kill();
     Entity &operator=(const Entity &other) = default;
     bool operator==(const Entity &other) const { return id == other.id; };
     bool operator!=(const Entity &other) const { return id != other.id; };
@@ -350,7 +350,7 @@ Registry *Registry::RemoveComponent(Entity entity)
     entityComponentSignatures[entityId].set(componentId, false);
 
     Logger::Log("Component id = " + std::to_string(componentId) + " was removed from entity id " + std::to_string(entityId));
-    
+
     return this;
 };
 

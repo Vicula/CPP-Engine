@@ -8,6 +8,8 @@
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/KeyboardControlledComponent.h"
 #include "../Components/CameraFollowComponent.h"
+#include "../Components/ProjectileEmitterComponent.h"
+#include "../Components/HealthComponent.h"
 #include "../Systems/MovementSystem.h"
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/RenderSystem.h"
@@ -15,11 +17,18 @@
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderColliderSystem.h"
 #include "../Systems/DamageSystem.h"
+#include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/KeyboardControlSystem.h"
+#include "../Systems/ProjectileLifecycleSystem.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <glm/glm.hpp>
 #include <fstream>
+
+int Engine::windowWidth;
+int Engine::windowHeight;
+int Engine::mapWidth;
+int Engine::mapHeight;
 
 Engine::Engine()
 {
@@ -118,7 +127,9 @@ void Engine::LoadLevel(int level)
         ->AddSystem<CollisionSystem>()
         ->AddSystem<RenderColliderSystem>()
         ->AddSystem<DamageSystem>()
-        ->AddSystem<KeyboardControlSystem>();
+        ->AddSystem<ProjectileEmitSystem>()
+        ->AddSystem<KeyboardControlSystem>()
+        ->AddSystem<ProjectileLifecycleSystem>();
 
     // Adding assets to the asset store
     assetStore
@@ -126,6 +137,7 @@ void Engine::LoadLevel(int level)
         ->AddTexture(renderer, "truck-image", "./assets/images/truck-ford-right.png")
         ->AddTexture(renderer, "chopper-image", "./assets/images/chopper-spritesheet.png")
         ->AddTexture(renderer, "radar-image", "./assets/images/radar.png")
+        ->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png")
         ->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
 
     int tileSize = 32;
@@ -149,10 +161,12 @@ void Engine::LoadLevel(int level)
             registry
                 ->CreateEntity()
                 .AddComponent<TransformComponent>(glm::vec2(x * (tileScale * tileSize), y * (tileScale * tileSize)), glm::vec2(tileScale, tileScale), 0.0)
-                .AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, 0, srcRectX, srcRectY);
+                .AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, 0, false, srcRectX, srcRectY);
         }
     }
     mapFile.close();
+    mapWidth = mapNumCols * tileSize * tileScale;
+    mapHeight = mapNumRows * tileSize * tileScale;
 
     // Create an entity
     registry->CreateEntity()
@@ -160,26 +174,32 @@ void Engine::LoadLevel(int level)
         .AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0))
         .AddComponent<SpriteComponent>("chopper-image", 32, 32, 1)
         .AddComponent<AnimationComponent>(2, 15, true)
-        .AddComponent<KeyboardControlledComponent>(glm::vec2(0, -80), glm::vec2(80, 0), glm::vec2(0, 80), glm::vec2(-80, 0))
-        .AddComponent<CameraFollowComponent>();
+        .AddComponent<ProjectileEmitterComponent>(glm::vec2(150.0, 150.0), 0, 10000, 0, true)
+        .AddComponent<KeyboardControlledComponent>(glm::vec2(0, -100), glm::vec2(100, 0), glm::vec2(0, 100), glm::vec2(-100, 0))
+        .AddComponent<CameraFollowComponent>()
+        .AddComponent<HealthComponent>(100);
 
     registry->CreateEntity()
         .AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0)
         .AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0))
-        .AddComponent<SpriteComponent>("radar-image", 64, 64, 1)
+        .AddComponent<SpriteComponent>("radar-image", 64, 64, 1, true)
         .AddComponent<AnimationComponent>(8, 5, true);
 
     registry->CreateEntity()
         .AddComponent<TransformComponent>(glm::vec2(500.0, 10.0), glm::vec2(1.0, 1.0), 0.0)
-        .AddComponent<RigidBodyComponent>(glm::vec2(-30.0, 0.0))
+        .AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0))
         .AddComponent<SpriteComponent>("tank-image", 32, 32, 1)
-        .AddComponent<BoxColliderComponent>(32, 32);
+        .AddComponent<BoxColliderComponent>(32, 32)
+        .AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0, 0.0), 5000, 10000, 0, false)
+        .AddComponent<HealthComponent>(100);
 
     registry->CreateEntity()
         .AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0)
-        .AddComponent<RigidBodyComponent>(glm::vec2(20.0, 0.0))
+        .AddComponent<RigidBodyComponent>(glm::vec2(0.0, 0.0))
         .AddComponent<SpriteComponent>("truck-image", 32, 32, 2)
-        .AddComponent<BoxColliderComponent>(32, 32);
+        .AddComponent<BoxColliderComponent>(32, 32)
+        .AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0, 100.0), 2000, 10000, 0, false)
+        .AddComponent<HealthComponent>(100);
 };
 
 void Engine::Setup()
@@ -207,6 +227,7 @@ void Engine::Update()
     // Perform the subscription of the events for all systems
     registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
     registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+    registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();
@@ -215,6 +236,8 @@ void Engine::Update()
     registry->GetSystem<MovementSystem>().Update(deltaTime);
     registry->GetSystem<AnimationSystem>().Update();
     registry->GetSystem<CollisionSystem>().Update(eventBus);
+    registry->GetSystem<ProjectileEmitSystem>().Update(registry);
+    registry->GetSystem<ProjectileLifecycleSystem>().Update();
     registry->GetSystem<CameraMovementSystem>().Update(camera);
 };
 
@@ -225,7 +248,7 @@ void Engine::Render()
 
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
 
-    isDebug && registry->GetSystem<RenderColliderSystem>().Update(renderer);
+    isDebug && registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
 
     SDL_RenderPresent(renderer);
 };

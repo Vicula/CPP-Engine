@@ -1,8 +1,8 @@
 // -*- lsst-c++ -*-
 /**
  ******************************************************************************
- * @file:   CameraFollowComponent.h
- * @brief:  Component used to make the camera follow an Entity
+ * @file:   HealthComponent.h
+ * @brief:  Component used to track health of an Entity
  ******************************************************************************
  * @attention
  *
@@ -12,14 +12,19 @@
  ******************************************************************************
  */
 
-#ifndef CAMERAFOLLOWCOMPONENT_H
-#define CAMERAFOLLOWCOMPONENT_H
+#ifndef HEALTHCOMPONENT_H
+#define HEALTHCOMPONENT_H
 
 #include <glm/glm.hpp>
 
-struct CameraFollowComponent
+struct HealthComponent
 {
-    CameraFollowComponent() = default;
+   int healthPercentage;
+
+    HealthComponent(int healthPercentage = 0)
+    {
+        this->healthPercentage = healthPercentage;
+    }
 };
 
-#endif /* __CAMERAFOLLOWCOMPONENT_H__ */
+#endif /* __HEALTHCOMPONENT_H__ */
