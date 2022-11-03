@@ -54,7 +54,7 @@ public:
                     const auto rigidbody = entity.GetComponent<RigidBodyComponent>();
 
                     // If parent entity has sprite, start the projectile position in the middle of the entity
-                    glm::vec2 projectilePosition = transform.position;
+                    glm::vec3 projectilePosition = transform.position;
                     if (entity.HasComponent<SpriteComponent>())
                     {
                         auto sprite = entity.GetComponent<SpriteComponent>();
@@ -63,7 +63,7 @@ public:
                     }
 
                     // If parent entity direction is controlled by the keyboard keys, modify the direction of the projectile accordingly
-                    glm::vec2 projectileVelocity = projectileEmitter.projectileVelocity;
+                    glm::vec3 projectileVelocity = projectileEmitter.projectileVelocity;
                     int directionX = 0;
                     int directionY = 0;
                     if (rigidbody.velocity.x > 0)
@@ -79,7 +79,7 @@ public:
 
                     // Create new projectile entity and add it to the world
                     entity.registry->CreateEntity()
-                        .AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), 0.0)
+                        .AddComponent<TransformComponent>(projectilePosition, glm::vec3(1.0, 1.0, 1.0), 0.0)
                         .AddComponent<RigidBodyComponent>(projectileVelocity)
                         .AddComponent<SpriteComponent>("bullet-image", 4, 4, 4)
                         .AddComponent<BoxColliderComponent>(4, 4)
@@ -105,7 +105,7 @@ public:
             // Check if its time to re-emit a new projectile
             if (SDL_GetTicks() - projectileEmitter.lastEmissionTime > projectileEmitter.repeatFrequency)
             {
-                glm::vec2 projectilePosition = transform.position;
+                glm::vec3 projectilePosition = transform.position;
                 if (entity.HasComponent<SpriteComponent>())
                 {
                     const auto sprite = entity.GetComponent<SpriteComponent>();
@@ -115,7 +115,7 @@ public:
 
                 // Add a new projectile entity to the registry
                 registry->CreateEntity()
-                    .AddComponent<TransformComponent>(projectilePosition, glm::vec2(1.0, 1.0), 0.0)
+                    .AddComponent<TransformComponent>(projectilePosition, glm::vec3(1.0, 1.0, 1.0), 0.0)
                     .AddComponent<RigidBodyComponent>(projectileEmitter.projectileVelocity)
                     .AddComponent<SpriteComponent>("bullet-image", 4, 4, 4)
                     .AddComponent<BoxColliderComponent>(4, 4)

@@ -2,7 +2,7 @@
 /**
  ******************************************************************************
  * @file: CameraMovementSystem.h
- * @brief: System used to manipulate locational data on an Entity
+ * @brief: System used to manipulate locational data of the camera
  ******************************************************************************
  * @attention
  *

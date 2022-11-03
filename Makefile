@@ -5,10 +5,13 @@ CC = clang++
 LANG_STD = -std=c++17
 COMPILER_FLAGS = -Wall -Wfatal-errors
 INCLUDE_PATH = -I"./libraries/includes/"
-SRC_FILES = ./src/*.cpp \
+SRC_FILES = ./src/glad.c \
+			./src/*.cpp \
 			./src/Engine/*.cpp \
 			./src/Logger/*.cpp \
 			./src/ECS/*.cpp \
+			./src/Camera/*.cpp \
+			./src/Models/**/*.cpp \
 			./src/AssetStore/*.cpp
 LINKER_FLAGS = -lSDL2 \
 				-lSDL2_image \

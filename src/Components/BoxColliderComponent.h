@@ -21,12 +21,14 @@ struct BoxColliderComponent
 {
     int width;
     int height;
-    glm::vec2 offset;
+    int depth;
+    glm::vec3 offset;
 
-    BoxColliderComponent(int width = 0, int height = 0, glm::vec2 offset = glm::vec2(0))
+    BoxColliderComponent(int width = 0, int height = 0, int depth = 0, glm::vec3 offset = glm::vec3(0))
     {
         this->width = width;
         this->height = height;
+        this->depth = depth;
         this->offset = offset;
     }
 };

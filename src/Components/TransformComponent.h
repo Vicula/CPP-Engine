@@ -19,13 +19,13 @@
 
 struct TransformComponent
 {
-    glm::vec2 position;
-    glm::vec2 scale;
+    glm::vec3 position;
+    glm::vec3 scale;
     double rotation;
 
     TransformComponent(
-        glm::vec2 position = glm::vec2(0, 0),
-        glm::vec2 scale = glm::vec2(1, 1),
+        glm::vec3 position = glm::vec3(0, 0, 0),
+        glm::vec3 scale = glm::vec3(1, 1, 1),
         double rotation = 0.0)
     {
         this->position = position;

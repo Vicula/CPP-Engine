@@ -3,11 +3,14 @@
 
 int main(int argc, char* argv[])
 {
-   Engine engine;
+    (void)argc;
+    (void)argv;
+    
+    Engine engine;
 
-   engine.Init();
-   engine.Run();
-   engine.Destroy();
+    engine.Init();
+    engine.Run();
+    engine.Destroy();
 
     return 0;
 }

@@ -20,12 +20,12 @@
 
 struct KeyboardControlledComponent
 {
-    glm::vec2 upVelocity;
-    glm::vec2 rightVelocity;
-    glm::vec2 downVelocity;
-    glm::vec2 leftVelocity;
+    glm::vec3 upVelocity;
+    glm::vec3 rightVelocity;
+    glm::vec3 downVelocity;
+    glm::vec3 leftVelocity;
 
-    KeyboardControlledComponent(glm::vec2 upVelocity = glm::vec2(0), glm::vec2 rightVelocity = glm::vec2(0), glm::vec2 downVelocity = glm::vec2(0), glm::vec2 leftVelocity = glm::vec2(0))
+    KeyboardControlledComponent(glm::vec3 upVelocity = glm::vec3(0), glm::vec3 rightVelocity = glm::vec3(0), glm::vec3 downVelocity = glm::vec3(0), glm::vec3 leftVelocity = glm::vec3(0))
     {
         this->upVelocity = upVelocity;
         this->rightVelocity = rightVelocity;
