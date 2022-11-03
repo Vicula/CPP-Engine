@@ -7,7 +7,6 @@
 
 #include "Engine.h"
 #include "../Logger/Logger.h"
-#include "../Camera/Camera.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
@@ -27,11 +26,6 @@
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/KeyboardControlSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
-#include "../Models/Meshes/Texture.h"
-#include "../Models/Shaders/Shader.h"
-#include "../Models/Meshes/VAO.h"
-#include "../Models/Meshes/VBO.h"
-#include "../Models/Meshes/EBO.h"
 
 #define WW 1000
 #define WH (WW / 16) * 9
@@ -42,22 +36,6 @@ int Engine::windowHeight = WH;
 int Engine::mapWidth;
 int Engine::mapHeight;
 SDL_GLContext glcontext;
-
-GLfloat vertices[] =
-    {
-        //     COORDINATES /   COLORS        /   TexCoord  //
-        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Lower left corner
-        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,  // Upper left corner
-        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // Upper right corner
-        0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f   // Lower right corner
-};
-
-// Indices for vertices order
-GLuint indices[] =
-    {
-        0, 2, 1, // Upper triangle
-        0, 3, 2  // Lower triangle
-};
 
 Engine::Engine()
 {
@@ -82,21 +60,7 @@ void Engine::Init()
         return;
     };
 
-        // SDL_DisplayMode displayMode;
-        // SDL_GetCurrentDisplayMode(0, &displayMode);
-        // windowWidth = displayMode.w;
-        // windowHeight = displayMode.h;
-
-        // window = SDL_CreateWindow(
-        //     NULL,
-        //     SDL_WINDOWPOS_CENTERED,
-        //     SDL_WINDOWPOS_CENTERED,
-        //     windowWidth,
-        //     windowHeight,
-        //     SDL_WINDOW_BORDERLESS);
-        // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
-
-#pragma region setup Window
+#pragma region init Window
     window = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
     if (!window)
@@ -109,9 +73,9 @@ void Engine::Init()
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     SDL_SetWindowTitle(window, "Context 4.6 with GLAD");
     SDL_ShowWindow(window);
-#pragma endregion setup Window
+#pragma endregion init Window
 
-#pragma region setup GLContext
+#pragma region init GLContext
     // Create an OpenGL context for an OpenGL window, and make it current.
     glcontext = SDL_GL_CreateContext(window);
 
@@ -131,47 +95,17 @@ void Engine::Init()
     // Specify the viewport of OpenGL in the Window
     // In this case the viewport goes from x = 0, y = 0, to x = windowWidth, y = windowHeight
     glViewport(0, 0, windowWidth, windowHeight);
-#pragma endregion setup GLContext
 
-#pragma region setup Icon
+    // Enables the Depth Buffer
+    glEnable(GL_DEPTH_TEST);
+#pragma endregion init GLContext
+
+#pragma region init Icon
     SDL_Surface *icon;
     icon = IMG_Load("./assets/images/tank-panther-right.png");
     SDL_SetWindowIcon(window, icon);
     SDL_FreeSurface(icon);
-#pragma endregion setup Icon
-
-    // // Generates Shader object using shaders default.vert and default.frag
-    // Shader shaderProgram("./src/Models/Shaders/vert/default.vert", "./src/Models/Shaders/frag/default.frag");
-
-    // // Generates Vertex Array Object and binds it
-    // VAO VAO1;
-    // VAO1.Bind();
-
-    // // Generates Vertex Buffer Object and links it to vertices
-    // VBO VBO1(vertices, sizeof(vertices));
-    // // Generates Element Buffer Object and links it to indices
-    // EBO EBO1(indices, sizeof(indices));
-
-    // // Links VBO attributes such as coordinates and colors to VAO
-    // VAO1.LinkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void *)0);
-    // VAO1.LinkAttrib(VBO1, 1, 3, GL_FLOAT, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-    // VAO1.LinkAttrib(VBO1, 2, 2, GL_FLOAT, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-    // // Unbind all to prevent accidentally modifying them
-    // VAO1.Unbind();
-    // VBO1.Unbind();
-    // EBO1.Unbind();
-
-    // // Gets ID of uniform called "scale"
-    // GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
-
-    // // Texture
-    // Texture brickTex("brick.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    // brickTex.texUnit(shaderProgram, "tex0", 0);
-
-    // Enables the Depth Buffer
-    glEnable(GL_DEPTH_TEST);
-
-    isRunning = true;
+#pragma endregion init Icon
 };
 
 void Engine::ProcessInput()
@@ -230,71 +164,75 @@ void Engine::LoadLevel(int level)
         ->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png")
         ->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
 
-    int tileSize = 32;
-    double tileScale = 2.0;
-    int mapNumCols = 25;
-    int mapNumRows = 20;
-    std::fstream mapFile;
-    mapFile.open("./assets/tilemaps/jungle.map");
+    // int tileSize = 32;
+    // double tileScale = 2.0;
+    // int mapNumCols = 25;
+    // int mapNumRows = 20;
+    // std::fstream mapFile;
+    // mapFile.open("./assets/tilemaps/jungle.map");
 
-    for (int y = 0; y < mapNumRows; y++)
-    {
-        for (int x = 0; x < mapNumCols; x++)
-        {
-            char ch;
-            mapFile.get(ch);
-            int srcRectY = std::atoi(&ch) * tileSize;
-            mapFile.get(ch);
-            int srcRectX = std::atoi(&ch) * tileSize;
-            mapFile.ignore();
+    // for (int y = 0; y < mapNumRows; y++)
+    // {
+    //     for (int x = 0; x < mapNumCols; x++)
+    //     {
+    //         char ch;
+    //         mapFile.get(ch);
+    //         int srcRectY = std::atoi(&ch) * tileSize;
+    //         mapFile.get(ch);
+    //         int srcRectX = std::atoi(&ch) * tileSize;
+    //         mapFile.ignore();
 
-            registry
-                ->CreateEntity()
-                .AddComponent<TransformComponent>(glm::vec3(x * (tileScale * tileSize), y * (tileScale * tileSize), 0), glm::vec3(tileScale, tileScale, tileScale), 0.0)
-                .AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, 0, false, srcRectX, srcRectY);
-        }
-    }
-    mapFile.close();
-    mapWidth = mapNumCols * tileSize * tileScale;
-    mapHeight = mapNumRows * tileSize * tileScale;
+    //         // registry
+    //         //     ->CreateEntity()
+    //         //     .AddComponent<TransformComponent>(glm::vec3(x * (tileScale * tileSize), y * (tileScale * tileSize), 0), glm::vec3(tileScale, tileScale, tileScale), 0.0)
+    //         //     .AddComponent<SpriteComponent>("tilemap-image", tileSize, tileSize, 0, false, srcRectX, srcRectY);
+    //     }
+    // }
+    // mapFile.close();
+    // mapWidth = mapNumCols * tileSize * tileScale;
+    // mapHeight = mapNumRows * tileSize * tileScale;
 
     // Create an entity
-    registry->CreateEntity()
-        .AddComponent<TransformComponent>(glm::vec3(10.0, 100.0, 1), glm::vec3(1.0, 1.0 , 1.0), 0.0)
-        .AddComponent<RigidBodyComponent>(glm::vec3(0.0, 0.0, 0.0))
-        .AddComponent<SpriteComponent>("chopper-image", 32, 32, 1)
-        .AddComponent<AnimationComponent>(2, 15, true)
-        .AddComponent<ProjectileEmitterComponent>(glm::vec3(150.0, 150.0, 1), 0, 10000, 0, true)
-        .AddComponent<KeyboardControlledComponent>(glm::vec3(0, -100, 0), glm::vec3(100, 0, 0), glm::vec3(0, 100, 0), glm::vec3(-100, 0, 0))
-        .AddComponent<CameraFollowComponent>()
-        .AddComponent<HealthComponent>(100);
+    // registry->CreateEntity()
+    //     .AddComponent<TransformComponent>(glm::vec3(10.0, 100.0, 1), glm::vec3(1.0, 1.0 , 1.0), 0.0)
+    //     .AddComponent<RigidBodyComponent>(glm::vec3(0.0, 0.0, 0.0))
+    //     .AddComponent<SpriteComponent>("chopper-image", 32, 32, 1)
+    //     .AddComponent<AnimationComponent>(2, 15, true)
+    //     .AddComponent<ProjectileEmitterComponent>(glm::vec3(150.0, 150.0, 1), 0, 10000, 0, true)
+    //     .AddComponent<KeyboardControlledComponent>(glm::vec3(0, -100, 0), glm::vec3(100, 0, 0), glm::vec3(0, 100, 0), glm::vec3(-100, 0, 0))
+    //     .AddComponent<CameraFollowComponent>()
+    //     .AddComponent<HealthComponent>(100);
 
-    registry->CreateEntity()
-        .AddComponent<TransformComponent>(glm::vec3(windowWidth - 74, 10.0, 1), glm::vec3(1.0, 1.0, 1.0), 0.0)
-        .AddComponent<RigidBodyComponent>(glm::vec3(0.0, 0.0, 0.0))
-        .AddComponent<SpriteComponent>("radar-image", 64, 64, 1, true)
-        .AddComponent<AnimationComponent>(8, 5, true);
+    // registry->CreateEntity()
+    //     .AddComponent<TransformComponent>(glm::vec3(windowWidth - 74, 10.0, 1), glm::vec3(1.0, 1.0, 1.0), 0.0)
+    //     .AddComponent<RigidBodyComponent>(glm::vec3(0.0, 0.0, 0.0))
+    //     .AddComponent<SpriteComponent>("radar-image", 64, 64, 1, true)
+    //     .AddComponent<AnimationComponent>(8, 5, true);
 
-    registry->CreateEntity()
-        .AddComponent<TransformComponent>(glm::vec3(500.0, 10.0, 1), glm::vec3(1.0, 1.0, 1.0), 0.0)
-        .AddComponent<RigidBodyComponent>(glm::vec3(0.0, 0.0, 0.0))
-        .AddComponent<SpriteComponent>("tank-image", 32, 32, 1)
-        .AddComponent<BoxColliderComponent>(32, 32)
-        .AddComponent<ProjectileEmitterComponent>(glm::vec3(100.0, 0.0, 0.0), 5000, 10000, 0, false)
-        .AddComponent<HealthComponent>(100);
+    // registry->CreateEntity()
+    //     .AddComponent<TransformComponent>(glm::vec3(500.0, 10.0, 1), glm::vec3(1.0, 1.0, 1.0), 0.0)
+    //     .AddComponent<RigidBodyComponent>(glm::vec3(0.0, 0.0, 0.0))
+    //     .AddComponent<SpriteComponent>("tank-image", 32, 32, 1)
+    //     .AddComponent<BoxColliderComponent>(32, 32)
+    //     .AddComponent<ProjectileEmitterComponent>(glm::vec3(100.0, 0.0, 0.0), 5000, 10000, 0, false)
+    //     .AddComponent<HealthComponent>(100);
 
-    registry->CreateEntity()
-        .AddComponent<TransformComponent>(glm::vec3(10.0, 10.0, 1), glm::vec3(1.0, 1.0, 1.0), 0.0)
-        .AddComponent<RigidBodyComponent>(glm::vec3(0.0, 0.0, 0.0))
-        .AddComponent<SpriteComponent>("truck-image", 32, 32, 2)
-        .AddComponent<BoxColliderComponent>(32, 32)
-        .AddComponent<ProjectileEmitterComponent>(glm::vec3(0.0, 100.0 , 0.0), 2000, 10000, 0, false)
-        .AddComponent<HealthComponent>(100);
+    // registry->CreateEntity()
+    //     .AddComponent<TransformComponent>(glm::vec3(10.0, 10.0, 1), glm::vec3(1.0, 1.0, 1.0), 0.0)
+    //     .AddComponent<RigidBodyComponent>(glm::vec3(0.0, 0.0, 0.0))
+    //     .AddComponent<SpriteComponent>("truck-image", 32, 32, 2)
+    //     .AddComponent<BoxColliderComponent>(32, 32)
+    //     .AddComponent<ProjectileEmitterComponent>(glm::vec3(0.0, 100.0 , 0.0), 2000, 10000, 0, false)
+    //     .AddComponent<HealthComponent>(100);
 };
 
 void Engine::Setup()
 {
+    // Init and setup current level
     LoadLevel(1);
+
+    // set Engine running to true
+    isRunning = true;
 };
 
 void Engine::Update()
@@ -315,40 +253,29 @@ void Engine::Update()
     eventBus->Reset();
 
     // Perform the subscription of the events for all systems
-    registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
-    registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
-    registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
+    // registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+    // registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+    // registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
 
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();
 
     // Invoke all the systems that need to update
-    registry->GetSystem<MovementSystem>().Update(deltaTime);
-    registry->GetSystem<AnimationSystem>().Update();
-    registry->GetSystem<CollisionSystem>().Update(eventBus);
-    registry->GetSystem<ProjectileEmitSystem>().Update(registry);
-    registry->GetSystem<ProjectileLifecycleSystem>().Update();
-    registry->GetSystem<CameraMovementSystem>().Update(camera);
+    // registry->GetSystem<MovementSystem>().Update(deltaTime);
+    // registry->GetSystem<AnimationSystem>().Update();
+    // registry->GetSystem<CollisionSystem>().Update(eventBus);
+    // registry->GetSystem<ProjectileEmitSystem>().Update(registry);
+    // registry->GetSystem<ProjectileLifecycleSystem>().Update();
+    // registry->GetSystem<CameraMovementSystem>().Update(camera);
 };
 
 void Engine::Render()
 {
-#pragma region renderer twoD
-    // SDL_SetRenderDrawColor(renderer, 21, 21, 21, 1);
-    // SDL_RenderClear(renderer);
-
-    // registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
-
-    // isDebug && registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
-
-    // SDL_RenderPresent(renderer);
-#pragma endregion renderer twoD
-
     // Specify the color of the background
-    glClearColor(GL_GREY);
+    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
     // Clean the back buffer and assign the new color to it
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Swap the back buffer with the front buffer
     SDL_GL_SwapWindow(window);
@@ -374,7 +301,7 @@ void Engine::Destroy()
     // glDeleteShader(vertexShader);
     // glDeleteShader(fragmentShader);
     // glDeleteProgram(shading_program);
-    assetStore->ClearAssets();
+
     SDL_GL_DeleteContext(glcontext);
     SDL_DestroyWindow(window);
     SDL_Quit();

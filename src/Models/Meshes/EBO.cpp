@@ -15,7 +15,7 @@ void EBO::Bind()
 }
 
 // Unbinds the EBO
-void EBO::Unbind()
+void EBO::Unbind
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
