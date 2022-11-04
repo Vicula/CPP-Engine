@@ -6,6 +6,11 @@
 #include <fstream>
 
 #include "Engine.h"
+#include "../Events/KeyReleasedEvent.h"
+#include "../Events/MouseMoveEvent.h"
+#include "../Events/MouseButtonPressedEvent.h"
+#include "../Events/MouseButtonReleasedEvent.h"
+#include "../Models/Model.h"
 #include "../Logger/Logger.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
@@ -37,13 +42,33 @@ int Engine::mapWidth;
 int Engine::mapHeight;
 SDL_GLContext glcontext;
 
+// Vertices coordinates
+GLfloat vertices[] =
+    {
+        //     COORDINATES     /        COLORS      /   TexCoord  //
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Lower left corner
+        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,  // Upper left corner
+        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // Upper right corner
+        0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f   // Lower right corner
+};
+
+// Indices for vertices order
+GLuint indices[] =
+    {
+        0, 2, 1, // Upper triangle
+        0, 3, 2  // Lower triangle
+};
+
 Engine::Engine()
 {
     isRunning = false;
     isDebug = false;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
-    eventBus = std::make_unique<EventBus>();
+    eventHandler = std::make_unique<EventHandler>();
+    inputHandler = std::make_unique<InputHandler>();
+    // Creates camera object
+    camera = Camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
     Logger::Log("Created");
 }
 
@@ -106,38 +131,6 @@ void Engine::Init()
     SDL_SetWindowIcon(window, icon);
     SDL_FreeSurface(icon);
 #pragma endregion init Icon
-};
-
-void Engine::ProcessInput()
-{
-    SDL_Event sdlEvent;
-    while (SDL_PollEvent(&sdlEvent))
-    {
-        switch (sdlEvent.type)
-        {
-        case SDL_QUIT:
-            isRunning = false;
-            break;
-        case SDL_KEYDOWN:
-            switch (sdlEvent.key.keysym.sym)
-            {
-            case SDLK_ESCAPE:
-                isRunning = false;
-                break;
-            case SDLK_MINUS:
-                isDebug = !isDebug;
-                break;
-            }
-            eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
-            break;
-        case SDL_WINDOWEVENT:
-            if (sdlEvent.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-            {
-                glViewport(0, 0, sdlEvent.window.data1, sdlEvent.window.data2);
-            }
-            break;
-        }
-    };
 };
 
 void Engine::LoadLevel(int level)
@@ -250,12 +243,12 @@ void Engine::Update()
     millisecsPreviousFrame = SDL_GetTicks();
 
     // Reset all event handlers for the current frame
-    eventBus->Reset();
+    eventHandler->Reset();
 
     // Perform the subscription of the events for all systems
-    // registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
-    // registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
-    // registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventBus);
+    // registry->GetSystem<DamageSystem>().SubscribeToEvents(eventHandler);
+    // registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventHandler);
+    // registry->GetSystem<ProjectileEmitSystem>().SubscribeToEvents(eventHandler);
 
     // Update the registry to process the entities that are waiting to be created/deleted
     registry->Update();
@@ -263,10 +256,18 @@ void Engine::Update()
     // Invoke all the systems that need to update
     // registry->GetSystem<MovementSystem>().Update(deltaTime);
     // registry->GetSystem<AnimationSystem>().Update();
-    // registry->GetSystem<CollisionSystem>().Update(eventBus);
+    // registry->GetSystem<CollisionSystem>().Update(eventHandler);
     // registry->GetSystem<ProjectileEmitSystem>().Update(registry);
     // registry->GetSystem<ProjectileLifecycleSystem>().Update();
     // registry->GetSystem<CameraMovementSystem>().Update(camera);
+
+    // TODO: Move into its own system
+    // Updates and exports the camera matrix to the Vertex Shader
+    camera.updateMatrix(45.0f, 0.1f, 100.0f);
+
+    // TODO: move into render system
+    //  Draw a model
+    //  model.Draw(shaderProgram, camera);
 };
 
 void Engine::Render()
@@ -286,7 +287,7 @@ void Engine::Run()
     Setup();
     while (isRunning)
     {
-        ProcessInput();
+        inputHandler->ProcessInput(eventHandler, &isRunning, &isDebug);
         Update();
         Render();
     }

@@ -36,14 +36,14 @@ public:
         RequireComponent<TransformComponent>();
     };
 
-    void SubscribeToEvents(std::unique_ptr<EventBus> &eventBus)
+    void SubscribeToEvents(std::unique_ptr<EventHandler> &eventHandler)
     {
-        eventBus->SubscribeToEvent<KeyPressedEvent>(this, &ProjectileEmitSystem::OnKeyPressed);
+        eventHandler->SubscribeToEvent<KeyPressedEvent>(this, &ProjectileEmitSystem::OnKeyPressed);
     }
 
     void OnKeyPressed(KeyPressedEvent &event)
     {
-        if (event.symbol == SDLK_SPACE)
+        if (event.inputHandler->isKeyDown(SDL_SCANCODE_SPACE))
         {
             for (auto entity : GetSystemEntities())
             {

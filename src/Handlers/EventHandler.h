@@ -1,8 +1,8 @@
 // -*- lsst-c++ -*-
 /**
  ******************************************************************************
- * @file EventBus.h
- * @brief The event bus
+ * @file EventHandler.h
+ * @brief The event handler
  ******************************************************************************
  * @attention
  *
@@ -11,14 +11,15 @@
  *
  ******************************************************************************
  */
-#ifndef EVENTBUS_H
-#define EVENTBUS_H
+#ifndef EVENTHANDLER_H
+#define EVENTHANDLER_H
 
-#include "../Logger/Logger.h"
-#include "Event.h"
 #include <map>
 #include <typeindex>
 #include <list>
+
+#include "../Logger/Logger.h"
+#include "../Events/Event.h"
 
 class IEventCallback
 {
@@ -63,23 +64,23 @@ typedef std::list<std::unique_ptr<IEventCallback>>
 
 /**
  ////////////////////////////////////////////////////////////////////////////////
- /// @brief The event bus
+ /// @brief The event handler
  ////////////////////////////////////////////////////////////////////////////////
  */
-class EventBus
+class EventHandler
 {
 private:
     std::map<std::type_index, std::unique_ptr<HandlerList>> subscribers;
 
 public:
-    EventBus()
+    EventHandler()
     {
-        Logger::Log("EventBus created");
+        Logger::Log("EventHandler created");
     };
 
-    ~EventBus()
+    ~EventHandler()
     {
-        Logger::Log("EventBus destroyed");
+        Logger::Log("EventHandler destroyed");
     };
 
     // Clears the subscribers list
@@ -93,7 +94,7 @@ public:
      ///
      /// In our implementation, a listener subscribes to an event.
      ///
-     /// @example eventBus->SubscribeToEvent<CollisionEvent>(this, &Game::onCollision);
+     /// @example eventHandler->SubscribeToEvent<CollisionEvent>(this, &Game::onCollision);
      ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TEvent, typename TOwner>
@@ -113,7 +114,7 @@ public:
      /// In our implementation, as soon as something emits an event
      /// we go ahead and execute all the listener callback functions
      ///
-     /// @example eventBus->EmitEvent<CollisionEvent>(player, enemy);
+     /// @example eventHandler->EmitEvent<CollisionEvent>(player, enemy);
      ////////////////////////////////////////////////////////////////////////////////
      */
     template <typename TEvent, typename... TArgs>
@@ -133,4 +134,4 @@ public:
     };
 };
 
-#endif /* __EVENTBUS_H__ */
+#endif /* __EVENTHANDLER_H__ */

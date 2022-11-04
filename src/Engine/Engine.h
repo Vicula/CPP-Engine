@@ -17,8 +17,10 @@
 #define ENGINE_H
 
 #include "../ECS/ECS.h"
+#include "../Camera/Camera.h"
 #include "../AssetStore/AssetStore.h"
-#include "../EventBus/EventBus.h"
+#include "../Handlers/EventHandler.h"
+#include "../Handlers/InputHandler.h"
 #include <SDL2/SDL.h>
 
 const int FPS = 120;
@@ -32,11 +34,12 @@ private:
     int millisecsPreviousFrame = 0;
     SDL_Window *window;
     SDL_Renderer *renderer;
-    SDL_Rect camera;
+    Camera camera;
 
     std::unique_ptr<Registry> registry;
     std::unique_ptr<AssetStore> assetStore;
-    std::unique_ptr<EventBus> eventBus;
+    std::unique_ptr<EventHandler> eventHandler;
+    std::unique_ptr<InputHandler> inputHandler;
 
 public:
     Engine();
@@ -45,7 +48,7 @@ public:
     void Run();
     void Setup();
     void LoadLevel(int level);
-    void ProcessInput();
+    // void ProcessInput();
     void Update();
     void Render();
     void Destroy();

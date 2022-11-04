@@ -17,7 +17,7 @@
 
 #include "../ECS/ECS.h"
 #include "../Components/BoxColliderComponent.h"
-#include "../EventBus/EventBus.h"
+#include "../Handlers/EventHandler.h"
 #include "../Events/CollisionEvent.h"
 
 class DamageSystem : public System
@@ -28,9 +28,9 @@ public:
         RequireComponent<BoxColliderComponent>();
     }
 
-    void SubscribeToEvents(std::unique_ptr<EventBus> &eventBus)
+    void SubscribeToEvents(std::unique_ptr<EventHandler> &eventHandler)
     {
-        eventBus->SubscribeToEvent<CollisionEvent>(this, &DamageSystem::OnCollision);
+        eventHandler->SubscribeToEvent<CollisionEvent>(this, &DamageSystem::OnCollision);
     }
 
     void OnCollision(CollisionEvent &event)

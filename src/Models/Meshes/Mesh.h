@@ -1,8 +1,8 @@
 // -*- lsst-c++ -*-
 /**
  ******************************************************************************
- * @file:   EBO.h
- * @brief:  Elements Buffer Object used for meshing Models
+ * @file:   Mesh.h
+ * @brief:  Mesh used for meshing Models
  ******************************************************************************
  * @attention
  *
@@ -12,8 +12,8 @@
  ******************************************************************************
  */
 
-#ifndef EBO_CLASS_H
-#define EBO_CLASS_H
+#ifndef MESH_CLASS_H
+#define MESH_CLASS_H
 
 #include <string>
 
@@ -43,4 +43,4 @@ public:
         glm::quat rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
         glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f));
 };
-#endif /* __EBO_CLASS_H__ */
+#endif /* __MESH_CLASS_H__ */

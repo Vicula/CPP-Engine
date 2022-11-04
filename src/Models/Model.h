@@ -15,10 +15,10 @@
 #ifndef MODEL_CLASS_H
 #define MODEL_CLASS_H
 
-#include <json/json.h>
 #include "./Meshes/Mesh.h"
 
-using json = nlohmann::json;
+// #include <json/json.h>
+// using json = nlohmann::json;
 
 class Model
 {
@@ -32,7 +32,7 @@ private:
     // Variables for easy access
     const char *file;
     std::vector<unsigned char> data;
-    json JSON;
+    // json JSON;
 
     // All the meshes and transformations
     std::vector<Mesh> meshes;
@@ -54,8 +54,10 @@ private:
     // Gets the binary data from a file
     std::vector<unsigned char> getData();
     // Interprets the binary data into floats, indices, and textures
-    std::vector<float> getFloats(json accessor);
-    std::vector<GLuint> getIndices(json accessor);
+    // std::vector<float> getFloats(json accessor);
+    // std::vector<GLuint> getIndices(json accessor);
+    std::vector<float> getFloats();
+    std::vector<GLuint> getIndices();
     std::vector<Texture> getTextures();
 
     // Assembles all the floats into vertices

@@ -1,8 +1,8 @@
 // -*- lsst-c++ -*-
 /**
  ******************************************************************************
- * @file: KeyPressedEvent.h
- * @brief: Event used to to represent a key press
+ * @file: MouseButtonPressedEvent.h
+ * @brief: Event used to to represent a mouse button press
  ******************************************************************************
  * @attention
  *
@@ -12,17 +12,19 @@
  ******************************************************************************
  */
 
-#ifndef KEYPRESSEDEVENT_H
-#define KEYPRESSEDEVENT_H
+#ifndef MOUSEBUTTONPRESSEDEVENT_H
+#define MOUSEBUTTONPRESSEDEVENT_H
+
+#include <SDL2/SDL.h>
 
 #include "Event.h"
 #include "../Handlers/InputHandler.h"
 
-class KeyPressedEvent : public Event
+class MouseButtonPressedEvent : public Event
 {
 public:
     InputHandler *inputHandler;
-    KeyPressedEvent(InputHandler &inputHandler) : inputHandler(&inputHandler) {}
+    MouseButtonPressedEvent(InputHandler &inputHandler) : inputHandler(&inputHandler) {}
 };
 
-#endif /* __KEYPRESSEDEVENT_H__ */
+#endif /* __MOUSEBUTTONPRESSEDEVENT_H__ */

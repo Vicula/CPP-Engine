@@ -18,6 +18,8 @@
 #include <string>
 #include <SDL2/SDL.h>
 
+#include "../Models/Model.h"
+
 struct SpriteComponent
 {
     std::string assetId;
@@ -26,6 +28,7 @@ struct SpriteComponent
     int zIndex;
     bool isFixed;
     SDL_Rect srcRect;
+    Model model = NULL;
 
     SpriteComponent(std::string assetId = "", int width = 0, int height = 0, int zIndex = 0, bool isFixed = false, int srcRectX = 0, int srcRectY = 0)
     {

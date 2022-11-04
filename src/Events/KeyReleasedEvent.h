@@ -1,8 +1,8 @@
 // -*- lsst-c++ -*-
 /**
  ******************************************************************************
- * @file: CollisionEvent.h
- * @brief: Event used to to represent a collision of two or more entites
+ * @file: KeyReleasedEvent.h
+ * @brief: Event used to to represent a key release
  ******************************************************************************
  * @attention
  *
@@ -12,18 +12,19 @@
  ******************************************************************************
  */
 
-#ifndef COLLISIONEVENT_H
-#define COLLISIONEVENT_H
+#ifndef KEYRELEASEDEVENT_H
+#define KEYRELEASEDEVENT_H
 
-#include "../ECS/ECS.h"
+#include <SDL2/SDL.h>
+
 #include "Event.h"
+#include "../Handlers/InputHandler.h"
 
-class CollisionEvent : public Event
+class KeyReleasedEvent : public Event
 {
 public:
-    Entity a;
-    Entity b;
-    CollisionEvent(Entity a, Entity b) : a(a), b(b){};
+    InputHandler *inputHandler;
+    KeyReleasedEvent(InputHandler &inputHandler) : inputHandler(&inputHandler) {}
 };
 
-#endif /* __COLLISIONEVENT_H__ */
+#endif /* __KEYRELEASEDEVENT_H__ */

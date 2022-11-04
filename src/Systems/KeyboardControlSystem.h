@@ -16,7 +16,7 @@
 #define KEYBOARDCONTROLSYSTEM_H
 
 #include "../ECS/ECS.h"
-#include "../EventBus/EventBus.h"
+#include "../Handlers/EventHandler.h"
 #include "../Events/KeyPressedEvent.h"
 #include "../Components/KeyboardControlledComponent.h"
 #include "../Components/RigidBodyComponent.h"
@@ -32,9 +32,9 @@ public:
         RequireComponent<RigidBodyComponent>();
     }
 
-    void SubscribeToEvents(std::unique_ptr<EventBus> &eventBus)
+    void SubscribeToEvents(std::unique_ptr<EventHandler> &eventHandler)
     {
-        eventBus->SubscribeToEvent<KeyPressedEvent>(this, &KeyboardControlSystem::OnKeyPressed);
+        eventHandler->SubscribeToEvent<KeyPressedEvent>(this, &KeyboardControlSystem::OnKeyPressed);
     }
 
     void OnKeyPressed(KeyPressedEvent &event)
@@ -45,24 +45,29 @@ public:
             auto &sprite = entity.GetComponent<SpriteComponent>();
             auto &rigidbody = entity.GetComponent<RigidBodyComponent>();
 
-            switch (event.symbol)
+            if (event.inputHandler->isKeyDown(SDL_SCANCODE_UP) ||
+                event.inputHandler->isKeyDown(SDL_SCANCODE_W))
             {
-            case SDLK_UP:
                 rigidbody.velocity = keyboardcontrol.upVelocity;
                 sprite.srcRect.y = sprite.height * 0;
-                break;
-            case SDLK_RIGHT:
+            }
+            if (event.inputHandler->isKeyDown(SDL_SCANCODE_RIGHT) ||
+                event.inputHandler->isKeyDown(SDL_SCANCODE_D))
+            {
                 rigidbody.velocity = keyboardcontrol.rightVelocity;
                 sprite.srcRect.y = sprite.height * 1;
-                break;
-            case SDLK_DOWN:
+            }
+            if (event.inputHandler->isKeyDown(SDL_SCANCODE_DOWN) ||
+                event.inputHandler->isKeyDown(SDL_SCANCODE_S))
+            {
                 rigidbody.velocity = keyboardcontrol.downVelocity;
                 sprite.srcRect.y = sprite.height * 2;
-                break;
-            case SDLK_LEFT:
+            }
+            if (event.inputHandler->isKeyDown(SDL_SCANCODE_LEFT) ||
+                event.inputHandler->isKeyDown(SDL_SCANCODE_A))
+            {
                 rigidbody.velocity = keyboardcontrol.leftVelocity;
                 sprite.srcRect.y = sprite.height * 3;
-                break;
             }
         }
     }

@@ -11,6 +11,7 @@ SRC_FILES = ./src/glad.c \
 			./src/Logger/*.cpp \
 			./src/ECS/*.cpp \
 			./src/Camera/*.cpp \
+			./src/Handlers/*.cpp \
 			./src/Models/**/*.cpp \
 			./src/AssetStore/*.cpp
 LINKER_FLAGS = -lSDL2 \
