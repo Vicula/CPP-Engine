@@ -13,7 +13,7 @@ SRC_FILES = ./src/glad.c \
 			./src/Camera/*.cpp \
 			./src/Handlers/*.cpp \
 			./src/Models/**/*.cpp \
-			./src/AssetStore/*.cpp
+			./src/Stores/*.cpp
 LINKER_FLAGS = -lSDL2 \
 				-lSDL2_image \
 				-lSDL2_ttf \

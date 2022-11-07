@@ -10,11 +10,11 @@
 #include "../Events/MouseMoveEvent.h"
 #include "../Events/MouseButtonPressedEvent.h"
 #include "../Events/MouseButtonReleasedEvent.h"
-#include "../Models/Model.h"
 #include "../Logger/Logger.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidBodyComponent.h"
 #include "../Components/SpriteComponent.h"
+#include "../Components/MeshComponent.h"
 #include "../Components/AnimationComponent.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/KeyboardControlledComponent.h"
@@ -43,20 +43,22 @@ int Engine::mapHeight;
 SDL_GLContext glcontext;
 
 // Vertices coordinates
-GLfloat vertices[] =
+Vertex vertices[] =
     {
-        //     COORDINATES     /        COLORS      /   TexCoord  //
-        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Lower left corner
-        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,  // Upper left corner
-        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // Upper right corner
-        0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f   // Lower right corner
+        Vertex{glm::vec3(-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f)},    // Lower left corner
+        Vertex{glm::vec3(0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f)},     // Lower right corner
+        Vertex{glm::vec3(0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f)},  // Upper corner
+        Vertex{glm::vec3(-0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f)}, // Inner left
+        Vertex{glm::vec3(0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f)},  // Inner right
+        Vertex{glm::vec3(0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f)}      // Inner down
 };
 
 // Indices for vertices order
 GLuint indices[] =
     {
-        0, 2, 1, // Upper triangle
-        0, 3, 2  // Lower triangle
+        0, 3, 5, // Lower left triangle
+        3, 2, 4, // Lower right triangle
+        5, 4, 1  // Upper triangle
 };
 
 Engine::Engine()
@@ -65,16 +67,18 @@ Engine::Engine()
     isDebug = false;
     registry = std::make_unique<Registry>();
     assetStore = std::make_unique<AssetStore>();
+    shaderStore = std::make_unique<ShaderStore>();
+    // meshStore = std::make_unique<MeshStore>();
     eventHandler = std::make_unique<EventHandler>();
     inputHandler = std::make_unique<InputHandler>();
     // Creates camera object
     camera = Camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
-    Logger::Log("Created");
+    Logger::Log("Engine Created");
 }
 
 Engine::~Engine()
 {
-    Logger::Log("destoryed");
+    Logger::Log("Engine Destoryed");
 }
 
 void Engine::Init()
@@ -82,6 +86,7 @@ void Engine::Init()
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
     {
         Logger::Err("Error initialzing SDL.");
+        Destroy();
         return;
     };
 
@@ -91,14 +96,22 @@ void Engine::Init()
     if (!window)
     {
         Logger::Err("Error creating SDL window.");
+        Destroy();
         return;
     };
 
     SDL_SetWindowSize(window, windowWidth, windowHeight);
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    SDL_SetWindowTitle(window, "Context 4.6 with GLAD");
+    SDL_SetWindowTitle(window, "OpenGL Game Engine");
     SDL_ShowWindow(window);
 #pragma endregion init Window
+
+#pragma region init Icon
+    SDL_Surface *icon;
+    icon = IMG_Load("./assets/images/tank-panther-right.png");
+    SDL_SetWindowIcon(window, icon);
+    SDL_FreeSurface(icon);
+#pragma endregion init Icon
 
 #pragma region init GLContext
     // Create an OpenGL context for an OpenGL window, and make it current.
@@ -107,6 +120,7 @@ void Engine::Init()
     if (!glcontext)
     {
         Logger::Err("Error creating OpenGL context.");
+        Destroy();
         return;
     };
 
@@ -124,13 +138,6 @@ void Engine::Init()
     // Enables the Depth Buffer
     glEnable(GL_DEPTH_TEST);
 #pragma endregion init GLContext
-
-#pragma region init Icon
-    SDL_Surface *icon;
-    icon = IMG_Load("./assets/images/tank-panther-right.png");
-    SDL_SetWindowIcon(window, icon);
-    SDL_FreeSurface(icon);
-#pragma endregion init Icon
 };
 
 void Engine::LoadLevel(int level)
@@ -156,6 +163,17 @@ void Engine::LoadLevel(int level)
         ->AddTexture(renderer, "radar-image", "./assets/images/radar.png")
         ->AddTexture(renderer, "bullet-image", "./assets/images/bullet.png")
         ->AddTexture(renderer, "tilemap-image", "./assets/tilemaps/jungle.png");
+
+    // Create and Add shaders to the shader store
+    shaderStore->AddShader("default", "default.vs", "default.fs");
+
+    // Create and add Meshes to the mesh store
+    // meshStore->AddMesh(
+    //     "default",
+    //     std::vector<Vertex>(vertices, vertices + sizeof(vertices) / sizeof(Vertex)),
+    //     std::vector<GLuint>(indices, indices + sizeof(indices) / sizeof(GLuint)));
+
+    registry->CreateEntity().AddComponent<MeshComponent>("default", "default");
 
     // int tileSize = 32;
     // double tileScale = 2.0;
@@ -263,15 +281,12 @@ void Engine::Update()
 
     // TODO: Move into its own system
     // Updates and exports the camera matrix to the Vertex Shader
-    camera.updateMatrix(45.0f, 0.1f, 100.0f);
-
-    // TODO: move into render system
-    //  Draw a model
-    //  model.Draw(shaderProgram, camera);
+    // camera.updateMatrix(45.0f, 0.1f, 100.0f);
 };
 
 void Engine::Render()
 {
+
     // Specify the color of the background
     glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 
@@ -302,6 +317,10 @@ void Engine::Destroy()
     // glDeleteShader(vertexShader);
     // glDeleteShader(fragmentShader);
     // glDeleteProgram(shading_program);
+
+    shaderStore->ClearShaders();
+    // meshStore->ClearMeshes();
+    assetStore->ClearAssets();
 
     SDL_GL_DeleteContext(glcontext);
     SDL_DestroyWindow(window);

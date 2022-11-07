@@ -18,7 +18,9 @@
 
 #include "../ECS/ECS.h"
 #include "../Camera/Camera.h"
-#include "../AssetStore/AssetStore.h"
+#include "../Stores/AssetStore.h"
+#include "../Stores/ShaderStore.h"
+#include "../Stores/MeshStore.h"
 #include "../Handlers/EventHandler.h"
 #include "../Handlers/InputHandler.h"
 #include <SDL2/SDL.h>
@@ -38,6 +40,8 @@ private:
 
     std::unique_ptr<Registry> registry;
     std::unique_ptr<AssetStore> assetStore;
+    std::unique_ptr<ShaderStore> shaderStore;
+    std::unique_ptr<MeshStore> meshStore;
     std::unique_ptr<EventHandler> eventHandler;
     std::unique_ptr<InputHandler> inputHandler;
 
@@ -48,7 +52,6 @@ public:
     void Run();
     void Setup();
     void LoadLevel(int level);
-    // void ProcessInput();
     void Update();
     void Render();
     void Destroy();

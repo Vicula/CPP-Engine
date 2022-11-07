@@ -18,7 +18,7 @@
 #include "../ECS/ECS.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/SpriteComponent.h"
-#include "../AssetStore/AssetStore.h"
+#include "../Stores/AssetStore.h"
 #include <SDL2/SDL.h>
 
 class RenderSystem : public System
