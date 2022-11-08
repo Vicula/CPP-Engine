@@ -19,7 +19,7 @@
 #include <list>
 
 #include "../Logger/Logger.h"
-#include "../Events/Event.h"
+#include "Event.h"
 
 class IEventCallback
 {

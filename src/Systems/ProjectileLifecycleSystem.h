@@ -17,7 +17,7 @@
 
 #include "../ECS/ECS.h"
 #include "../Components/ProjectileComponent.h"
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 
 class ProjectileLifecycleSystem : public System
 {
@@ -33,7 +33,7 @@ public:
         {
             auto projectile = entity.GetComponent<ProjectileComponent>();
 
-            SDL_GetTicks() - projectile.startTime > projectile.duration && (entity.Kill());
+            // SDL_GetTicks() - projectile.startTime > projectile.duration && (entity.Kill());
         }
     }
 };

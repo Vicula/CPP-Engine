@@ -19,7 +19,7 @@
 #include "../Engine/Engine.h"
 #include "../Components/TransformComponent.h"
 #include "../Components/CameraFollowComponent.h"
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 
 class CameraMovementSystem : public System
 {
@@ -30,10 +30,10 @@ public:
         RequireComponent<CameraFollowComponent>();
     };
 
-    void Update(SDL_Rect &camera)
-    {
-        for (auto entity : GetSystemEntities())
-        {
+    // void Update(SDL_Rect &camera)
+    // {
+        // for (auto entity : GetSystemEntities())
+        // {
             // auto &transform = entity.GetComponent<TransformComponent>();
 
             // transform.position.x + (camera.w / 2) < Engine::mapWidth && (camera.x = transform.position.x - (Engine::windowWidth / 2));
@@ -52,8 +52,8 @@ public:
             //     : camera.y > camera.h
             //         ? camera.h
             //         : camera.y;
-        }
-    };
+    //     }
+    // };
 };
 
 // // Handles key inputs

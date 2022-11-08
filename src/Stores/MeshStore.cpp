@@ -21,20 +21,16 @@ void MeshStore::ClearMeshes()
     meshes.clear();
 };
 
-MeshStore *MeshStore::AddMesh(const std::string &meshId, const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices)
+MeshStore *MeshStore::AddMesh(const std::string &meshId, const GLfloat &vertices, const GLuint &indices)
 {
-    meshes.insert(
-        std::make_pair(
-            meshId,
-            std::make_shared<Mesh>(vertices, indices)));
+    Mesh *mesh = new Mesh(vertices, indices);
+    meshes.emplace(meshId, mesh);
 
     Logger::Log("mesh added to store with id = " + meshId);
     return this;
 };
 
-Mesh &MeshStore::GetMesh(const std::string &meshId)
+Mesh *MeshStore::GetMesh(const std::string &meshId)
 {
-    return *(
-        std::static_pointer_cast<Mesh>(
-            meshes.find(meshId)->second));
+    return meshes[meshId];
 };

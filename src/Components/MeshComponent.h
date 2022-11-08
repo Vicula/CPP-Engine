@@ -16,13 +16,6 @@
 #define MESHCOMPONENT_H
 
 #include <string>
-#include <glad/glad.h>
-#include <vector>
-
-#include "../Models/Shaders/Shader.h"
-#include "../Models/Meshes/VAO.h"
-#include "../Models/Meshes/VBO.h"
-#include "../Models/Meshes/EBO.h"
 
 struct MeshComponent
 {

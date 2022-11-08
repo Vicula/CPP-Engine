@@ -15,9 +15,7 @@
 #ifndef MOUSEBUTTONPRESSEDEVENT_H
 #define MOUSEBUTTONPRESSEDEVENT_H
 
-#include <SDL2/SDL.h>
-
-#include "Event.h"
+#include "../Handlers/Event.h"
 #include "../Handlers/InputHandler.h"
 
 class MouseButtonPressedEvent : public Event

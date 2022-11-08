@@ -16,14 +16,18 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include "../ECS/ECS.h"
-#include "../Camera/Camera.h"
-#include "../Stores/AssetStore.h"
-#include "../Stores/ShaderStore.h"
-#include "../Stores/MeshStore.h"
+// #include "../Stores/MeshStore.h"
+// #include "../Camera/Camera.h"
+// #include "../Stores/AssetStore.h"
+// #include "../Stores/ShaderStore.h"
+
 #include "../Handlers/EventHandler.h"
 #include "../Handlers/InputHandler.h"
-#include <SDL2/SDL.h>
+
 
 const int FPS = 120;
 const int MILLISECS_PER_FRAME = 1000 / FPS;
@@ -34,14 +38,13 @@ private:
     bool isDebug;
     bool isRunning;
     int millisecsPreviousFrame = 0;
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    Camera camera;
+    GLFWwindow *window;
+    // Camera camera;
 
-    std::unique_ptr<Registry> registry;
-    std::unique_ptr<AssetStore> assetStore;
-    std::unique_ptr<ShaderStore> shaderStore;
-    std::unique_ptr<MeshStore> meshStore;
+    // std::unique_ptr<Registry> registry;
+    // std::unique_ptr<MeshStore> meshStore;
+    // std::unique_ptr<AssetStore> assetStore;
+    // std::unique_ptr<ShaderStore> shaderStore;
     std::unique_ptr<EventHandler> eventHandler;
     std::unique_ptr<InputHandler> inputHandler;
 

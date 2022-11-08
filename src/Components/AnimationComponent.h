@@ -15,7 +15,7 @@
 #ifndef ANIMATIONCOMPONENT_H
 #define ANIMATIONCOMPONENT_H
 
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 
 struct AnimationComponent
 {
@@ -31,7 +31,7 @@ struct AnimationComponent
         this->currentFrame = 1;
         this->frameRateSpeed = frameSpeedRate;
         this->isLoop = isLoop;
-        this->startTime = SDL_GetTicks();
+        // this->startTime = SDL_GetTicks();
     }
 };
 

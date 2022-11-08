@@ -15,7 +15,8 @@
 #ifndef INPUTHANDLER_H
 #define INPUTHANDLER_H
 
-#include <SDL2/SDL.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -26,24 +27,24 @@ class InputHandler
 private:
     std::vector<bool> buttonStates;
     glm::vec2 *mousePosition;
-    Uint8 *keystates;
+    // Uint8 *keystates;
 
 public:
     InputHandler();
     ~InputHandler(){};
-    void ProcessInput(std::unique_ptr<EventHandler> &eventHandler, bool *isRunning, bool *isDebug);
+    void ProcessInput(GLFWwindow *window, std::unique_ptr<EventHandler> &eventHandler, bool *isRunning, bool *isDebug);
 
     /// Handling Mouse Event
-    void onMouseButtonDown(SDL_Event &event);
-    void onMouseMove(SDL_Event &event);
-    void onMouseButtonUp(SDL_Event &event);
+    // void onMouseButtonDown(SDL_Event &event);
+    // void onMouseMove(SDL_Event &event);
+    // void onMouseButtonUp(SDL_Event &event);
     bool getMouseButtonState(int buttonNumber);
     glm::vec2 *getMousePosition();
 
     /// Handling Keyboard Event
     void onKeyDown();
     void onKeyUp();
-    bool isKeyDown(SDL_Scancode key) const;
+    // bool isKeyDown(SDL_Scancode key) const;
 };
 
 #endif /* __INPUTHANDLER_H__ */

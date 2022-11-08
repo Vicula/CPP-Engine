@@ -15,9 +15,7 @@
 #ifndef MOUSE_BUTTON_RELEASED_EVENT_H
 #define MOUSE_BUTTON_RELEASED_EVENT_H
 
-#include <SDL2/SDL.h>
-
-#include "Event.h"
+#include "../Handlers/Event.h"
 #include "../Handlers/InputHandler.h"
 
 class MouseButtonReleasedEvent : public Event

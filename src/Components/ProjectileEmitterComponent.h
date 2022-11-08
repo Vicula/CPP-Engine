@@ -15,7 +15,7 @@
 #ifndef PROJECTILEEMITTERCOMPONENT_H
 #define PROJECTILEEMITTERCOMPONENT_H
 
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 
 struct ProjectileEmitterComponent
@@ -34,7 +34,7 @@ struct ProjectileEmitterComponent
         this->projectileDuration = projectileDuration;
         this->hitPercentDamage = hitPercentDamage;
         this->isFriendly = isFriendly;
-        this->lastEmissionTime = SDL_GetTicks();
+        // this->lastEmissionTime = SDL_GetTicks();
     }
 };
 

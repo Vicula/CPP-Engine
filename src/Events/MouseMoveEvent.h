@@ -15,9 +15,7 @@
 #ifndef MOUSEMOVEEVENT_H
 #define MOUSEMOVEEVENT_H
 
-#include <SDL2/SDL.h>
-
-#include "Event.h"
+#include "../Handlers/Event.h"
 #include "../Handlers/InputHandler.h"
 
 class MouseMoveEvent : public Event

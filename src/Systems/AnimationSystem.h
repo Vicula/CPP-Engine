@@ -18,7 +18,7 @@
 #include "../ECS/ECS.h"
 #include "../Components/SpriteComponent.h"
 #include "../Components/AnimationComponent.h"
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 
 class AnimationSystem : public System
 {
@@ -36,8 +36,8 @@ public:
             auto &animation = entity.GetComponent<AnimationComponent>();
             auto &sprite = entity.GetComponent<SpriteComponent>();
 
-            animation.currentFrame = ((SDL_GetTicks() - animation.startTime) * animation.frameRateSpeed / 1000) % animation.numFrames;
-            sprite.srcRect.x = animation.currentFrame * sprite.width;
+            // animation.currentFrame = ((SDL_GetTicks() - animation.startTime) * animation.frameRateSpeed / 1000) % animation.numFrames;
+            // sprite.srcRect.x = animation.currentFrame * sprite.width;
         }
     }
 };

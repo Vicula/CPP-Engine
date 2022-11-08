@@ -15,7 +15,7 @@
 #ifndef PROJECTILECOMPONENT_H
 #define PROJECTILECOMPONENT_H
 
-#include <SDL2/SDL.h>
+// #include <SDL2/SDL.h>
 
 struct ProjectileComponent
 {
@@ -29,7 +29,7 @@ struct ProjectileComponent
         this->isFriendly = isFriendly;
         this->hitPercentDamage = hitPercentDamage;
         this->duration = duration;
-        this->startTime = SDL_GetTicks();
+        // this->startTime = SDL_GetTicks();
     }
 };
 

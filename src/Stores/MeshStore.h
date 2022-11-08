@@ -15,23 +15,24 @@
 #ifndef MESHSTORE_H
 #define MESHSTORE_H
 
-#include <unordered_map>
+#include <map>
 #include <string>
+#include <glad/glad.h>
 
 #include "../Models/Meshes/Mesh.h"
 
 class MeshStore
 {
 private:
-    std::unordered_map<std::string, std::shared_ptr<Mesh>> meshes;
+    std::map<std::string, Mesh *> meshes;
 
 public:
     MeshStore();
     ~MeshStore();
 
     void ClearMeshes();
-    MeshStore *AddMesh(const std::string &meshId, const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices);
-    Mesh &GetMesh(const std::string &meshId);
+    MeshStore *AddMesh(const std::string &meshId, const GLfloat &vertices, const GLuint &indices);
+    Mesh *GetMesh(const std::string &meshId);
 };
 
 #endif /* __MESHSTORE_H__ */

@@ -15,9 +15,7 @@
 #ifndef KEYRELEASEDEVENT_H
 #define KEYRELEASEDEVENT_H
 
-#include <SDL2/SDL.h>
-
-#include "Event.h"
+#include "../Handlers/Event.h"
 #include "../Handlers/InputHandler.h"
 
 class KeyReleasedEvent : public Event

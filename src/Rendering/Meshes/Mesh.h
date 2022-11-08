@@ -16,32 +16,23 @@
 #define MESH_CLASS_H
 
 #include <string>
+#include <glad/glad.h>
 
 #include "VAO.h"
 #include "EBO.h"
-#include "../../Camera/Camera.h"
-#include "Texture.h"
+#include "../Shaders/Shader.h"
 
 class Mesh
 {
-private:
-    std::unique_ptr<VBO> _VBO;
-    std::unique_ptr<EBO> _EBO;
-
 public:
-    std::vector<Vertex> vertices;
-    std::vector<GLuint> indices;
-    // std::vector<Texture> textures;
-
     // Store VAO in public so it can be used in the Draw function
-    std::unique_ptr <VAO> _VAO;
+    VAO VAO;
 
     // Initializes the mesh
-    // std::vector<Texture> &textures
-    Mesh(const std::vector<Vertex> &vertices, const std::vector<GLuint> &indices);
+    Mesh(const GLfloat &vertices, const GLuint &indices);
 
     // Draws the mesh
-    void Draw(Shader &shader, Camera &camera);
+    void Draw(Shader &shader);
 
     // Delete the mesh
     void Delete();

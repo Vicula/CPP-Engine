@@ -16,7 +16,7 @@
 #define COLLISIONEVENT_H
 
 #include "../ECS/ECS.h"
-#include "Event.h"
+#include "../Handlers/Event.h"
 
 class CollisionEvent : public Event
 {

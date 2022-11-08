@@ -15,7 +15,7 @@
 #ifndef KEYPRESSEDEVENT_H
 #define KEYPRESSEDEVENT_H
 
-#include "Event.h"
+#include "../Handlers/Event.h"
 #include "../Handlers/InputHandler.h"
 
 class KeyPressedEvent : public Event
