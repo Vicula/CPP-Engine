@@ -39,12 +39,11 @@
 
 #define WW 1000
 #define WH (WW / 16) * 9
-#define GL_GREY .07f, .13f, .17f, 1.0f
 
 int Engine::windowWidth = WW;
 int Engine::windowHeight = WH;
-int Engine::mapWidth;
-int Engine::mapHeight;
+int Engine::mapWidth{};
+int Engine::mapHeight{};
 
 // Vertices coordinates
 GLfloat vertices[] =
@@ -66,29 +65,23 @@ GLuint indices[] =
 };
 
 Engine::Engine()
+    : isRunning{false},
+      isDebug{false}
 {
-    isRunning = false;
-    isDebug = false;
-    // registry = std::make_unique<Registry>();
-    // meshStore = std::make_unique<MeshStore>();
-    // assetStore = std::make_unique<AssetStore>();
-    // shaderStore = std::make_unique<ShaderStore>();
+    // window = std::make_unique<Window>("OpenGL 4.6 Game", windowWidth, windowHeight);
+    window = std::make_unique<Window>("OpenGL 4.6 Game", windowWidth, windowHeight);
     eventHandler = std::make_unique<EventHandler>();
-    inputHandler = std::make_unique<InputHandler>();
-    // Creates camera object
-    // camera = Camera(windowWidth, windowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
     Logger::Log("Engine Created");
-}
+};
 
 Engine::~Engine()
 {
     Logger::Log("Engine Destoryed");
-}
+};
 
 void Engine::Init()
 {
-
-
+    window->Init();
 };
 
 void Engine::LoadLevel(int level){
@@ -202,6 +195,9 @@ void Engine::Setup()
 
 void Engine::Update()
 {
+    // process inputs from window
+    window->Update(eventHandler);
+
     // If we are too fast, waste some time until we reach the MILLISECS_PER_FRAME
     // Can comment this out for uncapped FPS
     // int timeToWait = MILLISECS_PER_FRAME - (SDL_GetTicks() - millisecsPreviousFrame);
@@ -240,25 +236,21 @@ void Engine::Update()
 
 void Engine::Render()
 {
-    // Specify the color of the background
-    glClearColor(GL_GREY);
+    window->Render();
 
-    // Clean the back buffer and assign the new color to it
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Swap the back buffer with the front buffer
-    glfwSwapBuffers(window);
+    window->NextFrame();
 };
 
 void Engine::Run()
 {
     Setup();
-    while (isRunning)
+    while (window->ShouldRun())
     {
-        inputHandler->ProcessInput(window , eventHandler, &isRunning, &isDebug);
         Update();
         Render();
     }
+
+    isRunning = false;
 };
 
 void Engine::Destroy()
@@ -267,8 +259,5 @@ void Engine::Destroy()
     // meshStore->ClearMeshes();
     // assetStore->ClearAssets();
 
-    // Delete window before ending the program
-    glfwDestroyWindow(window);
-    // Terminate GLFW before ending the program
-    glfwTerminate();
+    window->Delete();
 };

@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <string>
 
-#include "../Models/Shaders/Shader.h"
+#include "../Rendering/Shaders/Shader.h"
 
 class ShaderStore
 {

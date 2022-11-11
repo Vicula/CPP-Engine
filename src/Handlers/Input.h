@@ -17,44 +17,32 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <vector>
-#include <map>
 
-#include "../Rendering/Window.h"
-
-class Input
+class IInput
 {
+protected:
+    // If disabled, KeyInput.getIsKeyDown always returns false
+    bool _isEnabled{};
+    // Map from monitored keyes to their pressed states
+    std::vector<int> _keys;
+
     // Main KeyInput functionality
 public:
     // Takes a list of which keys to keep state for
-    Input(std::vector<int> keysToMonitor);
-    ~Input();
-    // If this KeyInput is enabled and the given key is monitored,
-    // returns pressed state.  Else returns false.
-    bool getIsKeyDown(int key);
+    IInput(std::vector<int> keysToMonitor) : _isEnabled{true}, _keys{keysToMonitor} {}
+
+    ~IInput() = default;
+
     // See _isEnabled for details
     bool getIsEnabled() { return _isEnabled; }
     void setIsEnabled(bool value) { _isEnabled = value; }
+};
 
-private:
-    // Used internally to update key states.  Called by the GLFW callback.
-    void setIsKeyDown(int key, bool isDown);
-    // Map from monitored keyes to their pressed states
-    std::map<int, bool> _keys;
-    // If disabled, KeyInput.getIsKeyDown always returns false
-    bool _isEnabled;
-
-    // Workaround for C++ class using a c-style-callback
-public:
-    // Must be called before any KeyInput instances will work
-    static void setupInputs(Window &window);
-
-private:
-    // The GLFW callback for key events.  Sends events to all KeyInput instances
-    static void callback(
-        GLFWwindow *window, int key, int scancode, int action, int mods);
-    // Keep a list of all KeyInput instances and notify them all of key events
-    static std::vector<Input *> _instances;
+template <typename TEvent>
+class Input : public IInput
+{
 };
 
 #endif /* __INPUT_CLASS_H__ */

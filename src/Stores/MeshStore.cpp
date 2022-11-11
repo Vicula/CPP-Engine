@@ -23,6 +23,7 @@ void MeshStore::ClearMeshes()
 
 MeshStore *MeshStore::AddMesh(const std::string &meshId, const GLfloat &vertices, const GLuint &indices)
 {
+    // TODO: Dont use new keyword
     Mesh *mesh = new Mesh(vertices, indices);
     meshes.emplace(meshId, mesh);
 

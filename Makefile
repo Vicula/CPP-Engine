@@ -12,9 +12,10 @@ SRC_FILES = ./libraries/libs/libglfw.3.3.dylib \
 			./src/Engine/*.cpp \
 			./src/Logger/*.cpp \
 			./src/ECS/*.cpp \
-			./src/Camera/*.cpp \
+			./src/Rendering/*.cpp \
+			./src/Rendering/Shaders/*.cpp \
+			./src/Rendering/Meshes/*.cpp \
 			./src/Handlers/*.cpp \
-			./src/Models/**/*.cpp \
 			./src/Stores/*.cpp
 LINKER_FLAGS = -lstd_image \
 				-lGLFW \

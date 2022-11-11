@@ -17,24 +17,37 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <string>
+
+#include "../Handlers/InputHandler.h"
+#include "../Handlers/EventHandler.h"
 
 class Window
 {
 private:
+    // std::unique_ptr<GLFWwindow, void (*)(GLFWwindow *)> _window;
     GLFWwindow *_window;
-    int _width;
-    int _height;
+    std::unique_ptr<InputHandler> _inputs;
     std::string _title;
+    int _width,
+        _height;
 
 public:
-    Window(std::string title, int width, int height);
+    Window(const std::string title, const int width, const int height);
     ~Window();
 
-    void Update();
-    void Delete();
-    GLFWwindow *GetWindow() const { return _window; }
+    void Init(),
+        Render(),
+        Update(std::unique_ptr<EventHandler> &eventHandler),
+        NextFrame(),
+        Delete();
+    bool ShouldRun() const;
+
+    // template <typename TEvent>
+    // void AddInput(std::vector<int> keysToMonitor)
+    // {
+    //     _inputs->AddInput<TEvent>(keysToMonitor);
+    // };
 };
 
 #endif /* __WINDOW_CLASS_H__ */

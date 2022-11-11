@@ -69,7 +69,7 @@ private:
     int id;
 
 public:
-    Entity(int id) : id(id){};
+    Entity(int id) : id{id}{};
     Entity(const Entity &entity) = default;
 
     int GetId() const;
@@ -221,7 +221,7 @@ public:
     ////////////////////////////////////////////////////////////////////////////////
     @{
     */
-#pragma region Component Management
+
     /**
      // @brief Add a component to the Registry
      ////////////////////////////////////////////////////////////////////////////////
@@ -249,7 +249,6 @@ public:
      */
     template <typename TComponent>
     TComponent &GetComponent(Entity entity) const;
-#pragma endregion Component Management
     /**
      @}
      ////////////////////////////////////////////////////////////////////////////////
@@ -326,8 +325,8 @@ Registry *Registry::AddComponent(Entity entity, TArgs &&...args)
     if (componentId >= componentPools.size())
         componentPools.resize(componentId + 1, nullptr);
 
-    if (!componentPools[componentId])
-        componentPools[componentId] = std::make_shared<Pool<TComponent>>();
+    !componentPools[componentId] &&
+        (componentPools[componentId] = std::make_shared<Pool<TComponent>>());
 
     std::shared_ptr<Pool<TComponent>> componentPool = std::static_pointer_cast<Pool<TComponent>>(componentPools[componentId]);
 

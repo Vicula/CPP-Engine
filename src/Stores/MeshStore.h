@@ -19,7 +19,7 @@
 #include <string>
 #include <glad/glad.h>
 
-#include "../Models/Meshes/Mesh.h"
+#include "../Rendering/Meshes/Mesh.h"
 
 class MeshStore
 {

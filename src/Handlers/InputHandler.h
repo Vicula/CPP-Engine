@@ -18,33 +18,58 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <vector>
-#include <glm/glm.hpp>
+#include <map>
+#include <list>
 
+#include "../Logger/Logger.h"
 #include "EventHandler.h"
+#include "Input.h"
 
 class InputHandler
 {
 private:
-    std::vector<bool> buttonStates;
-    glm::vec2 *mousePosition;
-    // Uint8 *keystates;
+    // The GLFW callback for key events.  Sends events to all KeyInput instances
+    static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+    // Map from keyes to their pressed states
+    static std::map<int, bool> _keys;
+    // Keep a list of all KeyInput instances and notify them all of key events
+    static std::map<std::vector<int>, std::unique_ptr<std::list<std::unique_ptr<IInput>>>> _watchedInputs;
+
+    bool getIsInputActive(std::vector<int> keysToWatch) const;
 
 public:
-    InputHandler();
-    ~InputHandler(){};
-    void ProcessInput(GLFWwindow *window, std::unique_ptr<EventHandler> &eventHandler, bool *isRunning, bool *isDebug);
+    InputHandler()
+    {
+        Logger::Log("InputHandler created");
+    };
 
-    /// Handling Mouse Event
-    // void onMouseButtonDown(SDL_Event &event);
-    // void onMouseMove(SDL_Event &event);
-    // void onMouseButtonUp(SDL_Event &event);
-    bool getMouseButtonState(int buttonNumber);
-    glm::vec2 *getMousePosition();
+    ~InputHandler()
+    {
+        Logger::Log("InputHandler destroyed");
+    };
 
-    /// Handling Keyboard Event
-    void onKeyDown();
-    void onKeyUp();
-    // bool isKeyDown(SDL_Scancode key) const;
+    void ProcessInput(std::unique_ptr<EventHandler> &eventHandler);
+
+    // Must be called before any Input instances will work
+    static void SetupInput(std::shared_ptr<GLFWwindow> &_window);
+
+    template <typename TEvent>
+    void AddInput(std::vector<int> keysToMonitor)
+    {
+        if (!_watchedInputs[keysToMonitor].get())
+        {
+            _watchedInputs[keysToMonitor] = {std::make_unique<std::list<std::unique_ptr<IInput>>>()};
+
+            for (int key : keysToMonitor)
+            {
+                std::map<int, bool>::iterator it{_keys.find(key)};
+                if (it == _keys.end())
+                    _keys[key] = {};
+            }
+        }
+        auto input{std::make_unique<Input<TEvent>>(keysToMonitor)};
+        _watchedInputs[keysToMonitor]->push_back(std::move(input));
+    };
 };
 
 #endif /* __INPUTHANDLER_H__ */

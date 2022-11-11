@@ -21,8 +21,8 @@ std::string get_file_contents(const char *filename)
 Shader::Shader(const std::string &vertexFile, const std::string &fragmentFile)
 {
     // Read vertexFile and fragmentFile and store the strings
-    std::string vertexCode = get_file_contents(("./src/Models/Shaders/vert/" + vertexFile).c_str());
-    std::string fragmentCode = get_file_contents(("./src/Models/Shaders/frag/" + fragmentFile).c_str());
+    std::string vertexCode = get_file_contents(("./src/Rendering/Shaders/vert/" + vertexFile).c_str());
+    std::string fragmentCode = get_file_contents(("./src/Rendering/Shaders/frag/" + fragmentFile).c_str());
 
     // Convert the shader source strings into character arrays
     const char *vertexSource = vertexCode.c_str();
